@@ -19,7 +19,8 @@ test('holy-corner inline format (HC-001) parses to the contract', () => {
     'Scaffold the repo: CI, branch protection, gstack, gbrain, the VM lane, a Railway skeleton',
   );
   assert.equal(ticket.phase, '0');
-  assert.equal(ticket.status, 'todo');
+  // Deliberately NOT asserting `status`. The fixture is a frozen snapshot (see fixtures/README.md)
+  // and HC-001's real status moves as the work does; this test is about the header SHAPE.
   // The Branch field is on a SECOND physical line that also carries prose after the value.
   // Only the first whitespace-delimited token is the branch; the rest is a sentence.
   assert.equal(ticket.branch, 'hc-001-scaffold-the-repo');
@@ -180,6 +181,40 @@ test('mapStatus covers the real free-text vocabulary', () => {
 });
 
 // --- depends_on extraction ------------------------------------------------------------------
+
+test('a digit-bearing prefix is read from the H1 AND from the filename', () => {
+  // parseDependsOn only exercises ID_GLOBAL. ID_ANCHORED is the pattern behind headings and
+  // filenames, and it was possible to revert it alone with the whole suite staying green.
+  const fromHeading = parseTicket('# SD3-0108 - How Wise is read\n\n**Status:** Todo\n', {
+    repo: 'sd3', path: 'docs/tickets/SD3-0108-how-wise-is-read.md',
+  });
+  assert.equal(fromHeading.ticket.id, 'SD3-0108');
+  assert.equal(fromHeading.ticket.title, 'How Wise is read');
+  assert.ok(looksLikeTicket(fromHeading));
+  assert.deepEqual(fromHeading.warnings, []);
+
+  // The filename fallback: no id in the H1, so ID_ANCHORED has to find it in the file stem.
+  const fromFilename = parseTicket('# How Wise is read\n', {
+    repo: 'sd3', path: 'docs/tickets/SD3-0108-how-wise-is-read.md',
+  });
+  assert.equal(fromFilename.ticket.id, 'SD3-0108');
+  assert.ok(fromFilename.warnings.some((w) => w.code === 'no-id-in-heading'));
+});
+
+test('an H1 with no id falls back to the filename and says so', () => {
+  const { ticket, warnings } = parseTicket('# Just a title, no id\n\n**Status:** Todo\n', {
+    repo: 'holy-corner', path: 'docs/tickets/HC-099-orphan.md',
+  });
+  assert.equal(ticket.id, 'HC-099');
+  assert.equal(ticket.title, 'Just a title, no id');
+  assert.ok(warnings.some((w) => w.code === 'no-id-in-heading'));
+});
+
+test('an empty H1 warns that the title was derived from the filename', () => {
+  const { ticket, warnings } = parseTicket('# \n', { repo: 'r', path: 'docs/tickets/HC-098-a-slug.md' });
+  assert.ok(warnings.some((w) => w.code === 'no-title'));
+  assert.ok(ticket.title.length >= 1, 'the contract requires a non-empty title');
+});
 
 test('a prefix containing a digit (SD3) is a real ticket id, not a near-miss', () => {
   // The whole reason the id pattern is [A-Z][A-Z0-9]+ rather than [A-Z]{2,}. Before this, HC-015's

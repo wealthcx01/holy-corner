@@ -5,11 +5,15 @@ import { join } from 'node:path';
 import { parseTicket, type ParseResult } from '../src/index';
 
 /**
- * Acceptance criteria (FB-004):
- *   - 100% of sampled real tickets parse WITHOUT throwing.
- *   - ≥90% parse with ZERO warnings.
- * Measured over the committed real-ticket corpus (grassmarket + fountainbridge). The corpus is
- * real files copied into fixtures/ so CI is deterministic (no GitHub fetch — that's FB-006).
+ * The parser must cope with real ticket files, not just the ideal template:
+ *   - 100% of the corpus parses WITHOUT throwing.
+ *   - at least 90% parse with ZERO warnings.
+ *
+ * The corpus is FROZEN COPIES under `fixtures/real/`, drawn from all three repositories in the
+ * estate: holy-corner, grassmarket and fountainbridge. Frozen on purpose. This test answers "is the
+ * parser correct against these header shapes", and it must keep answering the same question when
+ * somebody edits a live ticket. "Are the tickets on disk well formed" is a different question, and
+ * `repo-tickets.test.ts` is where it is asked.
  */
 
 const REAL = join(import.meta.dirname, '..', 'fixtures', 'real');

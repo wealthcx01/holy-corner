@@ -14,7 +14,7 @@
  * repo, and regenerate.
  */
 
-/** Where a ticket sits in the one-ticket-one-branch-one-PR flow (FB-002 spec). */
+/** Where a ticket sits in the one-ticket-one-branch-one-PR flow (CLAUDE.md #1). */
 export type TicketStatus = 'todo' | 'in-progress' | 'pr-open' | 'done';
 
 export const TICKET_STATUSES: readonly TicketStatus[] = [
@@ -30,7 +30,7 @@ export const TICKET_STATUSES: readonly TicketStatus[] = [
  * everything else is parsed from the markdown.
  */
 export interface Ticket {
-  /** Ticket id, e.g. 'FB-001' (or 'GRS-0147b'). */
+  /** Ticket id, e.g. 'HC-001' (or 'GRS-0147b', 'SD3-0108'). */
   id: string;
   /** Repo the ticket lives in — from caller context, not the markdown. */
   repo: string;
@@ -42,17 +42,17 @@ export interface Ticket {
   phase: string | null;
   /** Ids of tickets this one depends on. */
   depends_on: string[];
-  /** Lifecycle status. Parse-time default is `todo`; PR-derived inference lands in FB-007. */
+  /** Lifecycle status, read from the `**Status:**` line. Parse-time default is `todo`. */
   status: TicketStatus;
-  /** Branch name (fb-XXX-slug), if the ticket declares one. */
+  /** Branch name (hc-nnn-slug: the filename lowercased), if the ticket declares one. */
   branch: string | null;
-  /** URL of the open/merged PR, if any. Always null at parse time (filled by FB-007). */
+  /** URL of the open or merged PR, if any. ALWAYS null here: nothing in this repo fills it. */
   pr_url: string | null;
   /** Rendered markdown body of the ticket (the full source). */
   body_md: string;
 }
 
-/** Non-fatal issue found while parsing. Surfaced, never swallowed (CLAUDE.md non-negotiable #10). */
+/** Non-fatal issue found while parsing. Surfaced, never swallowed (CLAUDE.md #3, fail loud). */
 export interface ParseWarning {
   /** Stable machine code, e.g. 'no-id', 'unrecognized-status'. */
   code: ParseWarningCode;

@@ -8,6 +8,13 @@
  *
  * Do not loosen a rule here without reading the paragraph that explains what it cost to learn it.
  *
+ * ONE CHANGE was made on the way in, in three places: the ticket-id prefix is `[A-Z]{2,}[0-9]*`
+ * rather than `[A-Z]{2,}`, so a prefix carrying a digit (SD3) is seen. Without it this module
+ * could not see an SD3 ticket in a filename or a commit subject, while the parser next door could
+ * see it in a dependency list - the same silent hole, left open in the file next door. The parser
+ * keeps its own copy of the pattern because it is an isolated package;
+ * `tools/ticket-parser/test/ticket-drift.test.ts` asserts the two agree so they cannot drift.
+ *
  * ## Why this exists
  *
  * The board is the answer to "what is happening in my company". On 2026-07-31, **eight tickets said
@@ -165,7 +172,7 @@ export function statusFromMarkdown(markdown: string): string | null {
 
 /** The ticket id a filename encodes: `FB-064-read-and-accept.md` → `FB-064`. */
 export function idFromFilename(filename: string): string | null {
-  const m = filename.match(/^([A-Z]{2,}-\d+[a-z]?)-/);
+  const m = filename.match(/^([A-Z]{2,}[0-9]*-\d+[a-z]?)-/);
   return m ? m[1] : null;
 }
 
@@ -179,7 +186,7 @@ export function isShippingCommit(paths: string[]): boolean {
   return paths.some((p) => p.trim() !== '' && !p.startsWith('docs/tickets/'));
 }
 
-const TICKET_ID = /\b[A-Z]{2,}-\d+[a-z]?\b/g;
+const TICKET_ID = /\b[A-Z]{2,}[0-9]*-\d+[a-z]?\b/g;
 
 /**
  * A range of ticket ids: `FB-124…FB-142`, `FB-124...FB-142`, `FB-124 – FB-142`.
@@ -191,7 +198,7 @@ const TICKET_ID = /\b[A-Z]{2,}-\d+[a-z]?\b/g;
  * `main` went red on exactly this: the planning commit for the desk redesign said
  * "…and FB-124…FB-142", and the checker demanded FB-142 be marked Done for work that had not started.
  */
-const TICKET_ID_RANGE = /\b[A-Z]{2,}-\d+[a-z]?\s*(?:\.{2,3}|…|—|–|-{1,2}>?|\bto\b)\s*[A-Z]{2,}-\d+[a-z]?\b/g;
+const TICKET_ID_RANGE = /\b[A-Z]{2,}[0-9]*-\d+[a-z]?\s*(?:\.{2,3}|…|—|–|-{1,2}>?|\bto\b)\s*[A-Z]{2,}[0-9]*-\d+[a-z]?\b/g;
 
 /**
  * Which tickets one commit is evidence for — the two precise signals, and nothing looser.

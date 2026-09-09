@@ -1,6 +1,11 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 /**
- * Fail loudly when a ticket file disagrees with what shipped (FB-070).
+ * Fail loudly when a ticket file disagrees with what shipped (ported from fountainbridge FB-070).
+ *
+ * RUN IT WITH BUN, NOT NODE. Line 19 imports `../lib/ticket-drift.ts` directly, and node cannot
+ * load a TypeScript module that way. `make ticket-drift` says `bun`, and the CI job installs bun
+ * for this reason. The shebang said `node` all the way from fountainbridge, where it is equally
+ * wrong: anyone who trusted it got a module-resolution error instead of the check.
  *
  * Run by CI. It reads every ticket's `**Status:**` line and every commit on the default branch, and
  * reports any ticket whose work is in the history while its file still says it is in progress.

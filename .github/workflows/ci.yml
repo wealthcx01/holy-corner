@@ -112,7 +112,21 @@ jobs:
     # gate that sees a screen. HC-006 makes it real.
     #
     # FB-114: a job with no timeout ran to GitHub's six-hour ceiling twice in one day when the
-    # browser install wedged. Every step here is bounded.
+    # browser install wedged. The job is bounded at 20 minutes, and the step that does the work is
+    # bounded inside that, so a wedged install fails fast and cheap rather than slowly.
+    #
+    # NO `--with-deps` ON THE INSTALL, EVER. The ubuntu-latest runner already carries chromium's
+    # libraries, so only the browser download is needed. `--with-deps` runs apt, and an unreachable
+    # Ubuntu mirror then turns this gate red for a reason that is not a fact about this repository.
+    # Fountainbridge spent a whole 8-minute budget on `Ign: azure.archive.ubuntu.com` retries before
+    # removing it (FB-114, amended 2026-08-19). If a library ever is missing, the tests fail in
+    # seconds with a loader error naming it, which is a better failure than apt retrying a mirror.
+    #
+    # HC-006 makes this job real. When it does, port fountainbridge's two cache steps as well:
+    # resolve the installed @playwright/test version into $GITHUB_OUTPUT, then actions/cache@v4 on
+    # ~/.cache/ms-playwright keyed by that version, with the install guarded on a cache miss. The
+    # key must be the version, so that a version bump misses the cache instead of testing against
+    # a browser the new version never asked for. There is no cache here yet.
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -120,11 +134,10 @@ jobs:
         with:
           node-version: "22"
       - name: Run the UI gate
+        timeout-minutes: 15
         run: |
           if [ -f playwright.config.ts ]; then
             npm ci --no-audit --no-fund
-            # Cache keyed on the resolved Playwright version: a version bump MUST miss the cache,
-            # or the run tests against a browser the new version did not ask for.
             npx playwright install chromium
             npm run test:e2e
           else

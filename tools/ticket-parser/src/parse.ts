@@ -20,7 +20,6 @@ import type {
   TicketStatus,
 } from './types';
 
-/** Ticket id: 2+ uppercase letters, a hyphen, digits, an optional lowercase suffix. e.g. FB-1, GRS-0147b. */
 /**
  * A ticket id at the start of a heading or filename.
  *
@@ -32,7 +31,7 @@ import type {
  * quietly accumulate.
  */
 /**
- * HC-001: the prefix is `[A-Z][A-Z0-9]+`, NOT `[A-Z]{2,}`, because this estate has a repo whose
+ * HC-001: the prefix is `[A-Z]{2,}[0-9]*`, NOT `[A-Z]{2,}`, because this estate has a repo whose
  * prefix contains a digit - SD3.
  *
  * Fountainbridge's version required an all-letter prefix, which was true of every prefix it had
@@ -43,9 +42,19 @@ import type {
  * possible way (CLAUDE.md #3), on the one field that says what a ticket is waiting for.
  *
  * Caught by this repo's own fixture set on the first run.
+ *
+ * The first attempt at the fix was `[A-Z][A-Z0-9]+`, and it was too loose: a single letter
+ * followed by a digit made `Q1-2026` and `H1-2026` parse as ticket ids. In an advisory firm's
+ * repository a quarter label is ordinary prose, and "due after Q1-2026" in a Depends on value
+ * would have become a dependency on a ticket that does not exist. `[A-Z]{2,}[0-9]*` takes SD3 and
+ * refuses both, because it still demands two letters before any digits.
+ *
+ * `lib/ticket-drift.ts` MUST use the same pattern. It has its own copy, because the parser is an
+ * isolated package with no root dependency, and `test/ticket-drift.test.ts` asserts the two agree
+ * on the same inputs so the copies cannot drift apart unnoticed.
  */
-const ID_ANCHORED = /^([A-Z][A-Z0-9]+-(?:\d+[a-z]?|NEW))\b/;
-const ID_GLOBAL = /\b[A-Z][A-Z0-9]+-\d+[a-z]?\b/g;
+const ID_ANCHORED = /^([A-Z]{2,}[0-9]*-(?:\d+[a-z]?|NEW))\b/;
+const ID_GLOBAL = /\b[A-Z]{2,}[0-9]*-\d+[a-z]?\b/g;
 /** Separators between an id and its title in an H1: em/en dash, hyphen, colon, middot. */
 const HEADING_SEP = /\s*[—–\-:·]\s*/;
 /**
@@ -203,27 +212,33 @@ export function parseTicket(markdown: string, ctx: ParseContext): ParseResult {
     // Only split when the line actually looks inline (≥2 bold fields), so a bullet value that
     // legitimately contains `·` (e.g. "blocked · waiting") isn't silently truncated.
     //
-    // HC-001: a SECOND condition, because five of this repo's tickets lost their branch without it.
+    // HC-001 REPLACED fountainbridge's rule here rather than adding to it.
     //
-    // The multi-repo tickets (HC-005, HC-018, HC-031, HC-035, HC-052) wrap their header over three
-    // lines, and the wrapped line reads:
+    // The inherited rule was `boldCount >= 4 && line.includes('·')`: split a line into fields only
+    // when it already looks like it holds several. It could not read the multi-repo tickets, whose
+    // header wraps and leaves the field after prose:
     //
     //     (`packages/bcap_contracts` only) · **Branch:** `hc-005-...` here and a
     //
-    // One bold field, so the old `>= 4` test declined to split, and FIELD is anchored to the start
-    // of a line, so `**Branch:**` sitting after the prose matched nothing. The branch parsed to
-    // null on a field the ticket states plainly - a declared value dropped in silence, which is
-    // the same fault as the SD3-0108 one above (CLAUDE.md #3).
+    // One bold field, so `>= 4` declined to split, and FIELD is anchored to the start of a line, so
+    // `**Branch:**` after the prose matched nothing. HC-005, HC-018, HC-031, HC-035 and HC-052 all
+    // parsed their branch as null - a declared value dropped in silence, which is the fail-loud rule
+    // broken quietly (CLAUDE.md #3), on the field that says where a ticket's work happens.
     //
-    // The added rule is deliberately narrow: split when a bold field appears AFTER a `·`. It says
-    // "there is another field further along this line", which is exactly the case that was missed.
-    // It does not fire on `- **Status:** blocked · waiting on HC-002`, where what follows the `·`
-    // is prose and truncating it would lose half the status - the case the original rule protects,
-    // which still has its own test.
-    const boldCount = line.match(/\*\*/g)?.length ?? 0;
-    const fieldAfterSeparator = /·[^·]*\*\*[^*\n]{1,80}\*\*[ \t]{0,4}:|·[^·]*\*\*[^*\n]{1,80}:[ \t]{0,4}\*\*/.test(line);
-    const segments =
-      line.includes('·') && (boldCount >= 4 || fieldAfterSeparator) ? line.split('·') : [line];
+    // The replacement asks the question that actually matters: IS THERE ANOTHER FIELD FURTHER ALONG
+    // THIS LINE? A bold run ending in a colon, somewhere after a `·`.
+    //
+    // It SUBSUMES the old rule rather than sitting beside it, and that was measured, not assumed:
+    // any line carrying two `**Key:**` fields separated by `·` necessarily has a bold field after a
+    // `·`, so this clause fires wherever the old one usefully did. Deleting `boldCount >= 4` left
+    // all 55 tests green; deleting this clause turned two red. Keeping a clause that can never
+    // change an outcome is the dead code this repository's own standards forbid.
+    //
+    // It still does NOT fire on `- **Status:** blocked · waiting on HC-002`, where what follows the
+    // `·` is prose and truncating it would lose half the status. That case keeps its own test.
+    const fieldAfterSeparator =
+      /·[^·]*\*\*[^*\n]{1,80}\*\*[ \t]{0,4}:|·[^·]*\*\*[^*\n]{1,80}:[ \t]{0,4}\*\*/.test(line);
+    const segments = line.includes('·') && fieldAfterSeparator ? line.split('·') : [line];
     for (const segment of segments) {
       const m = segment.match(FIELD);
       if (!m) continue;

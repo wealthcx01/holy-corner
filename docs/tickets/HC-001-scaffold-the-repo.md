@@ -132,3 +132,49 @@ every command. This ticket created one anyway, because that is what it specifies
 sibling studios use, and swapping the mechanism is not this ticket's job. Filed as **HC-055**, which
 covers all three repositories, because a deploy configuration that is silently ignored is worse than
 one that is missing.
+
+## What `/review` found, and what changed because of it
+
+Two specialist reviewers ran against the diff. Between them they found five things worth the PR,
+and three of those were proved by mutation rather than argued.
+
+**The required drift check shipped with no tests at all.** `lib/ticket-drift.ts` exports six
+functions and backs the required "Tickets match the history" job. Fountainbridge has 198 lines of
+tests for that module at `lib/__tests__/ticket-drift.test.ts`, and the first pass at this ticket
+ported the module and left the tests behind. Ported verbatim is not the same as covered. All 29 are
+now here, converted from vitest to `node --test` because that is the only runner in this repository
+until HC-002. They live inside the parser's package for the same reason, with a note to move them to
+the root suite when HC-002 brings vitest.
+
+**The id pattern was fixed twice, because the first fix was too loose.** `[A-Z][A-Z0-9]+` took SD3
+and also took `Q1-2026` and `H1-2026`. In an advisory firm's repository a quarter label is ordinary
+prose, so "due after Q1-2026" in a `Depends on` value would have become a dependency on a ticket
+that does not exist. `[A-Z]{2,}[0-9]*` takes SD3 and refuses both, because it still demands two
+letters before any digits. Four mutations now fail: the pattern cannot be tightened back without
+losing SD3, and cannot be loosened without picking up quarter labels.
+
+**The parser and the drift check disagreed about what a ticket id is, inside one commit.** The
+parser was widened so SD3-0108 stopped vanishing; `lib/ticket-drift.ts` was left on the old pattern,
+where `idFromFilename('SD3-0108-x.md')` returned null. The same silent hole, thirty lines away, in
+the module whose own header says a check that quietly does nothing is indistinguishable from one
+that found nothing. Both now use the same pattern, and a test asserts they agree on the same inputs,
+so the two copies cannot drift apart unnoticed.
+
+**Half the split rule was dead code.** The inherited `boldCount >= 4` clause could be deleted with
+all 55 tests still green, while deleting the new clause turned two red. Any line carrying two
+`**Key:**` fields separated by `·` necessarily has a bold field after a `·`, so the new clause fires
+wherever the old one usefully did. Removed rather than pinned with a contrived test, and the comment
+that claimed it "still has its own test" was false and is gone.
+
+**Three comments described protections the files did not have.** The UI-gate job said "every step
+here is bounded" with no step timeout, and described a version-keyed browser cache that does not
+exist. `src/parse.ts` still opened with "2+ uppercase letters" directly above the paragraph
+explaining why it is not that any more. A comment claiming a protection is worse than no comment: it
+convinces the next reader the work is done. The job now has a bounded step, fountainbridge's
+`--with-deps` warning is carried across, the cache is described as HC-006's job in the words of what
+is missing, and the stale line is deleted.
+
+Smaller: the drift script's shebang said `node` when the file only runs under bun, and the Makefile
+invented a `--check` flag that HC-005 never specifies. Both fixed. The ticket-parser's own
+docblocks still introduced it as fountainbridge's package and promised work under FB-006 and FB-007
+that will never happen here.

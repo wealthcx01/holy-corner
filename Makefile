@@ -17,6 +17,9 @@
 #
 # contracts-parity: regenerate TypeScript from the vendored bcap-contracts schemas and fail if it
 #                   differs from what is committed. A no-op until HC-005 vendors the schemas.
+#                   It regenerates and diffs, which is exactly what HC-005 specifies, rather than
+#                   inventing a --check flag that HC-005 never mentions and whoever writes the
+#                   script would have to discover by reading this file.
 #
 # The three no-op targets exist now, and are wired to their CI jobs now, so that the job names in
 # .github/workflows/ci.yml never have to change. A renamed required check is a check that silently
@@ -46,7 +49,7 @@ copy-lint:
 
 contracts-parity:
 	@if [ -f scripts/generate-types.mjs ]; then \
-		node scripts/generate-types.mjs --check; \
+		node scripts/generate-types.mjs && git diff --exit-code -- lib/contracts/; \
 	else \
 		echo "contracts-parity: no vendored schemas yet - this becomes real in HC-005."; \
 	fi
