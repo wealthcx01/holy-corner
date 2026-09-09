@@ -1,0 +1,26 @@
+# Reference copy of the LabCI Elite Vault project (its own git repo, wealthcx01/elite-vault). Read-only harvest source; never committed here.
+elite-vault/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+tsconfig.tsbuildinfo
+playwright-report/
+test-results/
+
+# Environment and secrets — never in the repo (CLAUDE.md non-negotiable)
+.env
+.env.*
+!.env.example
+
+# Local data
+data/*.db
+data/*.db-wal
+data/*.db-shm
+data/uploads/
+
+# Tooling
+.gstack/
+.DS_Store
+Thumbs.db
