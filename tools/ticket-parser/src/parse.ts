@@ -73,7 +73,12 @@ const FIELD =
  * checked before `in-progress` so "not started" doesn't get caught by "started".
  */
 const STATUS_RULES: ReadonlyArray<readonly [TicketStatus, RegExp]> = [
-  ['done', /\b(done|complete|completed|shipped|merged|closed|fixed|resolved|implemented|delivered|landed|ratified)\b/],
+  // `withdrawn` and `superseded` are here because `lib/ticket-drift.ts` already treats both as
+  // concluded (its FINISHED set), and the two tools reading the same `**Status:**` line must not
+  // disagree about what a word means. They did: HC-054 was marked "Superseded by HC-001", which
+  // ticket-drift accepted as finished while the parser warned `unrecognized-status` on it.
+  // Pinned by a test that walks ticket-drift's whole vocabulary through mapStatus.
+  ['done', /\b(done|complete|completed|shipped|merged|closed|fixed|resolved|implemented|delivered|landed|ratified|withdrawn|superseded)\b/],
   ['pr-open', /\b(pr[\s-]?open|in[\s-]?review|under[\s-]?review|awaiting[\s-]?review|ready[\s-]?for[\s-]?review)\b|pr\s*#/],
   ['todo', /\b(todo|to[\s-]?do|backlog|planned|not[\s-]?started|draft|proposed|queued|pending)\b/],
   ['in-progress', /\b(in[\s-]?progress|wip|active|doing|ongoing|building|paused|blocked|on[\s-]?hold|halted|underway|started)\b/],

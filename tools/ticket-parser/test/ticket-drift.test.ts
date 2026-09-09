@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   findDrift, idFromFilename, isShippingCommit, partShippedReason, statusFromMarkdown, ticketsShippedBy,
 } from '../../../lib/ticket-drift';
-import { parseDependsOn, parseTicket, looksLikeTicket } from '../src/index';
+import { parseDependsOn, parseTicket, looksLikeTicket, mapStatus } from '../src/index';
 
 /**
  * Tests for `lib/ticket-drift.ts`, ported from fountainbridge's `lib/__tests__/ticket-drift.test.ts`
@@ -242,5 +242,37 @@ describe('the drift check and the parser agree on what a ticket id is', () => {
     }
     const r = parseTicket('# Q1-2026 - Revenue plan\n', { repo: 'r', path: 'docs/tickets/Q1-2026-revenue.md' });
     assert.equal(looksLikeTicket(r), false, 'a quarterly plan must not render as a ticket');
+  });
+});
+
+/**
+ * The two tools must agree about what a status WORD means, not just what an id looks like.
+ *
+ * `lib/ticket-drift.ts` has a FINISHED set; `src/parse.ts` has a `done` rule. They are read off the
+ * same `**Status:**` line by two checks in the same CI run. They disagreed: HC-054 was marked
+ * "Superseded by HC-001", which ticket-drift treats as finished and the parser flagged as an
+ * unrecognised status, so "Parse tickets" went amber for a word "Tickets match the history"
+ * blesses.
+ */
+describe('the drift check and the parser agree on what a finished status is', () => {
+  test('every word ticket-drift treats as concluded maps to done in the parser', () => {
+    // ticket-drift's FINISHED set, written out. If that set grows, this test fails until the
+    // parser's vocabulary grows with it.
+    for (const word of ['Done', 'Shipped', 'Merged', 'Closed', 'Withdrawn', 'Superseded']) {
+      assert.equal(mapStatus(word), 'done', `parser does not recognise "${word}"`);
+      // and ticket-drift exempts it from drift even when the work has shipped
+      assert.equal(
+        findDrift([{ id: 'HC-1', status: word, file: 'a.md' }], evidence(['HC-1'])).length,
+        0,
+        `ticket-drift does not treat "${word}" as concluded`,
+      );
+    }
+  });
+
+  test('a qualifier after the word does not break either tool', () => {
+    for (const status of ['Superseded by HC-001 (9 September 2026)', 'Closed - not a defect']) {
+      assert.equal(mapStatus(status), 'done', status);
+      assert.equal(findDrift([{ id: 'HC-1', status, file: 'a.md' }], evidence(['HC-1'])).length, 0, status);
+    }
   });
 });

@@ -1,10 +1,11 @@
 # HC-001 — Scaffold the repo: CI, branch protection, gstack, gbrain, the VM lane, a Railway skeleton
 
-**Status:** In review · **Phase:** 0 · **Depends on:** — · **Repo:** holy-corner ·
+**Status:** Done · **Phase:** 0 · **Depends on:** — · **Repo:** holy-corner ·
 **Branch:** `hc-001-scaffold-the-repo` · One ticket = one branch = one PR.
 
-**Shipped in part:** branch protection on `main` is not applied, and the repository is not
-registered as a gbrain source. Both are blocked, neither is forgotten, and both are named below.
+**Shipped in part:** the repository is not registered as a gbrain source, because a running
+`gbrain serve` still holds the PGLite single-writer lock. Everything else in this ticket is done.
+Branch protection WAS blocked and is now applied; see the amended criterion below.
 
 ## Why this matters (for John)
 
@@ -59,11 +60,17 @@ them in.
 ## Acceptance criteria
 
 - [x] CI runs on a PR with all ten named jobs green.
-- [ ] **A direct push to `main` is refused; the refusal text is in the PR.** *Not done, and it
-      cannot be done from this repository.* GitHub refuses branch protection AND rulesets on a
-      private repository under this account's plan. Making the repository public to get round it is
-      out of scope in this ticket and wrong on the merits: the commercial record is committed here.
-      Filed as **HC-054**, which needs a decision from John before it can start.
+- [x] **A direct push to `main` is refused.** Done on 9 September 2026, after John made the
+      repository public, which is what made branch protection available on this account's plan.
+      `main` now requires a pull request and all ten checks, with 0 approvals, strict up-to-date,
+      linear history, no force pushes, no deletions, and administrators included. The refusal:
+
+      ```
+      Changes must be made through a pull request.  (HTTP 422)
+      ```
+
+      HC-054 was filed while this was blocked and is superseded. Read "The gate that was not yet a
+      gate" below before testing a protection rule the same way.
 - [x] `make ticket-drift` passes on this ticket set, and fails when a ticket disagrees with the
       history. *The criterion as written asked for the opposite direction* — "fails on a fixture
       ticket marked Done with no commit mentioning it" — which the ported check deliberately does
@@ -178,3 +185,38 @@ Smaller: the drift script's shebang said `node` when the file only runs under bu
 invented a `--check` flag that HC-005 never specifies. Both fixed. The ticket-parser's own
 docblocks still introduced it as fountainbridge's package and promised work under FB-006 and FB-007
 that will never happen here.
+
+
+## The gate that was not yet a gate
+
+Worth recording, because this ticket is about making gates real and it is the ticket that got caught
+by one.
+
+Branch protection was applied through the API, which returned the full rule with all ten checks. A
+direct push to `main` about thirty seconds later **succeeded anyway**. GitHub had accepted the rule
+but was not yet enforcing it. The push put this branch's commits on `main` and GitHub then closed
+the pull request as merged, which is exactly what the instruction for this ticket said not to do.
+
+Three minutes later the same operation was refused with `Changes must be made through a pull
+request`. The rule was correct throughout. Only its enforcement lagged.
+
+Two things to carry forward:
+
+**A rule the API has accepted is not yet a rule that is stopping anything.** If you need to know
+that a protection is live, ask it a question rather than pushing at it.
+
+**Test a branch rule with an API ref update, not a git push.** This produces the same proof and
+cannot advance the branch, whatever the answer turns out to be:
+
+```
+gh api -X PATCH repos/<owner>/<repo>/git/refs/heads/main -f sha=<the current sha>
+```
+
+Refused means the gate is live. Accepted is a no-op, because the sha is the one already there. A
+`git push` in the same situation either proves the gate or defeats it, and there is no way to know
+which until afterwards.
+
+**`git push --dry-run` proves nothing here.** It never contacts the server's pre-receive hooks, so
+it reports a clean fast-forward whether the branch is protected or not. It reported success both
+before protection was applied and after. An earlier comment on the pull request cited it as
+evidence; that comment has been corrected.

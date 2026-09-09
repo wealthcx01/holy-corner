@@ -1,9 +1,17 @@
 # HC-054 — Protect the main branch
 
-**Status:** Todo · **Phase:** 0 · **Depends on:** HC-001 · **Repo:** holy-corner ·
+**Status:** Superseded by HC-001 (9 September 2026) · **Phase:** 0 · **Depends on:** HC-001 · **Repo:** holy-corner ·
 **Branch:** `hc-054-protect-the-main-branch` · One ticket = one branch = one PR.
 
-## Why this matters (for John)
+**Superseded.** This ticket existed only because branch protection could not be applied to a
+private repository on this account's plan. John made the repository public on 9 September 2026,
+which removed the block, and the work went back where it belonged: HC-001's own scope. `main` now
+requires a pull request and all ten checks. The detail, and the lesson about testing a protection
+rule before it is enforcing, are in HC-001.
+
+The exposure that came with going public is HC-056.
+
+## Why this mattered (for John)
 
 HC-001 built the ten CI checks. It could not switch on the thing that makes them matter: the rule
 that stops a pull request merging while any of them is red, and stops anyone pushing straight to
