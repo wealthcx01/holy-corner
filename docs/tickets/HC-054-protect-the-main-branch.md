@@ -43,9 +43,22 @@ cloned and indexed long before anyone can take it back.
   includes protected branches for private repositories.
 - Apply the rule to `main` with `gh api`: a pull request is required, all ten checks are required,
   0 approving reviews, no force-push, no deletion, and administrators included.
-- The ten required checks, named exactly as `.github/workflows/ci.yml` names them: **Lint,
-  Typecheck, Test, Build, Playwright UI gate, Design contract, Copy contract, Tickets match the
-  history, Contracts parity, Parse tickets.**
+- The ten required checks, one per line so each can be copied exactly as
+  `.github/workflows/ci.yml` names them. A name retyped slightly wrong is a check that silently
+  stops being required:
+
+  ```
+  Lint
+  Typecheck
+  Test
+  Build
+  Playwright UI gate
+  Design contract
+  Copy contract
+  Tickets match the history
+  Contracts parity
+  Parse tickets
+  ```
 - Attempt a direct push to `main`, and put the refusal text in the pull request.
 - Check whether grassmarket's `main` should be protected too, and file a GRS ticket if so. It is
   public, so nothing but the decision is in the way.

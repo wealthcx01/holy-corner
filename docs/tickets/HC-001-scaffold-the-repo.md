@@ -119,9 +119,9 @@ repository's very first CI run would have been red for the same reason fountainb
 
 **This ticket's ticket-drift criterion asked for the opposite of what the check does.** It says the
 check should fail "on a fixture ticket marked Done with no commit mentioning it". The ported check
-deliberately does not do that, and `lib/ticket-drift.ts` explains why at length: plenty of
-legitimate work leaves no commit naming it — a decision, a withdrawn ticket, work folded into
-another — so flagging those produces noise, and a check people learn to ignore is worse than no
+deliberately does not do that, and `lib/ticket-drift.ts` explains why at length. Plenty of
+legitimate work leaves no commit naming it: a decision, a withdrawn ticket, work folded into
+another. Flagging those produces noise, and a check people learn to ignore is worse than no
 check. It is one-directional on purpose: it reports a ticket that shipped and does not say so.
 Verified in the direction it actually works, with a scratch clone: a ticket marked Todo whose id is
 named in a code-changing commit is reported, and the command exits 1. The criterion's wording is
