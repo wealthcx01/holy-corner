@@ -1,0 +1,210 @@
+name: CI
+
+# The lane gate (HC-001): every pull request into main runs these ten jobs.
+#
+# The Next.js app arrives in HC-002, so most of them have nothing to check yet. Each one passes
+# trivially until its own ticket makes it real, because branch protection needs green, named checks
+# to require from day one. THE JOB NAMES NEVER CHANGE — that is the whole point of naming them now.
+# Renaming one silently drops it from the required list and nobody finds out until something bad
+# merges (fountainbridge learned this; its names have been stable since FB-001).
+#
+# Which ticket makes each job real:
+#   Lint, Typecheck, Test, Build, Design contract  -> HC-002 (the app and design-lint)
+#   Playwright UI gate                             -> HC-006
+#   Copy contract                                  -> HC-009
+#   Contracts parity                               -> HC-005
+#   Tickets match the history, Parse tickets       -> real now, in this ticket
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Lint
+        run: |
+          if [ -f package.json ]; then
+            npm ci --no-audit --no-fund
+            npm run lint
+          else
+            echo "No app yet - lint is a no-op until HC-002 adds the Next.js app."
+          fi
+
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Typecheck
+        run: |
+          if [ -f package.json ]; then
+            npm ci --no-audit --no-fund
+            npm run typecheck
+          else
+            echo "No app yet - typecheck is a no-op until HC-002 adds the Next.js app."
+          fi
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Test
+        run: |
+          if [ -f package.json ]; then
+            npm ci --no-audit --no-fund
+            npm test
+          else
+            echo "No app yet - tests are a no-op until HC-002 adds the Next.js app."
+          fi
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # The auth secret here is a throwaway. The build never touches a real credential; every runtime
+    # secret lives in the Railway environment (CLAUDE.md #9, HC-007).
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Build
+        run: |
+          if [ -f package.json ]; then
+            npm ci --no-audit --no-fund
+            npm run build
+          else
+            echo "No app yet - build is a no-op until HC-002 adds the Next.js app."
+          fi
+        env:
+          AUTH_SECRET: build-time-placeholder-not-a-real-secret
+          AUTH_TRUST_HOST: "true"
+
+  e2e:
+    name: Playwright UI gate
+    runs-on: ubuntu-latest
+    # A REQUIRED check from the first pull request, deliberately. Fountainbridge left it advisory,
+    # a red one merged itself, and FB-124 shipped a studio with two navigations and a 250px rail on
+    # a 393px phone while lint, typecheck, 1050 tests and the build were all green. It is the only
+    # gate that sees a screen. HC-006 makes it real.
+    #
+    # FB-114: a job with no timeout ran to GitHub's six-hour ceiling twice in one day when the
+    # browser install wedged. Every step here is bounded.
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Run the UI gate
+        run: |
+          if [ -f playwright.config.ts ]; then
+            npm ci --no-audit --no-fund
+            # Cache keyed on the resolved Playwright version: a version bump MUST miss the cache,
+            # or the run tests against a browser the new version did not ask for.
+            npx playwright install chromium
+            npm run test:e2e
+          else
+            echo "No UI gate yet - it is a no-op until HC-006 adds Playwright."
+          fi
+      - name: Upload UI-gate gallery (screenshots + report)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-gate-gallery
+          path: |
+            e2e/__screenshots__/
+            playwright-report/
+          if-no-files-found: ignore
+
+  design:
+    name: Design contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Tokens only, one status vocabulary, no dead controls. Pure Node, no install: it reads app/
+    # and components/ when they exist. HC-002 makes it real.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Enforce the design contract
+        run: make design-lint
+
+  copy:
+    name: Copy contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # The plain-English rules a machine can check (docs/STYLE-VOICE.md). HC-009 makes it real.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Enforce the copy contract
+        run: make copy-lint
+
+  ticket-drift:
+    name: Tickets match the history
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Needs the FULL history: the check reads every commit on main to see what shipped, and a
+    # shallow clone would silently find nothing and pass (fountainbridge FB-070).
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: oven-sh/setup-bun@v2
+      - name: Check tickets against what shipped
+        run: make ticket-drift
+
+  contracts-parity:
+    name: Contracts parity
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # The vendored bcap-contracts schemas must regenerate to exactly the TypeScript in the tree.
+    # Both studios hand-wrote their types and both drifted. HC-005 makes it real.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check generated types against the schemas
+        run: make contracts-parity
+
+  tickets:
+    name: Parse tickets
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # docs/tickets/*.md must parse into the Ticket contract. Isolated tool (tools/ticket-parser),
+    # so it needs no root package.json and no app. Real from this ticket.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Parse docs/tickets against the Ticket contract
+        run: make parse-tickets

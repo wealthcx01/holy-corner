@@ -4,13 +4,14 @@ Detail lives in `docs/tickets/`. Status here mirrors each ticket's `**Status:**`
 `make ticket-drift` fails CI when the two disagree with git. Ticket numbers are allocated as
 `max(existing)+1` at filing time.
 
-Last reconciled: 2026-09-09 (the day the set was drafted; nothing has shipped).
+Last reconciled: 2026-09-09. HC-001 is in review and shipped in part; HC-054 and HC-055 were filed
+from what building it turned up. Nothing has merged.
 
 ## Phase 0 — Foundations
 
 | Ticket | Title | Status |
 |---|---|---|
-| HC-001 | Scaffold the repo: CI, branch protection, gstack, gbrain, the VM lane, a Railway skeleton | Todo |
+| HC-001 | Scaffold the repo: CI, branch protection, gstack, gbrain, the VM lane, a Railway skeleton | In review — shipped in part, see the ticket |
 | HC-002 | App shell: Next.js, the Bruntsfield tokens, the top bar, design-lint, the glossary | Todo |
 | HC-003 | Sign-in: Google and the password door, roles, the admin allowlist, server-side scoping | Todo |
 | HC-004 | The data layer: Postgres on Railway, migrations, one repository, PGLite for tests | Todo |
@@ -19,6 +20,8 @@ Last reconciled: 2026-09-09 (the day the set was drafted; nothing has shipped).
 | HC-007 | Deploy: the Railway service, health, the domain, the OAuth client, the env table | Todo |
 | HC-008 | Seed and fixtures: the commercial record as data, and a demo mode | Todo |
 | HC-009 | copy-lint: plain English as a mechanism, not a hope | Todo |
+| HC-054 | Protect the main branch | Todo — needs a decision from John |
+| HC-055 | railway.json is deprecated and stops working on 1 December 2026 | Todo |
 
 ## Phase 1 — The record
 
