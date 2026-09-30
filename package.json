@@ -4,7 +4,9 @@
   "private": true,
   "description": "Bruntsfield OS — the internal, admin-only hub across every vertical (HC-002 app shell onward).",
   "type": "module",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -15,6 +17,7 @@
   },
   "dependencies": {
     "next": "^15.5.4",
+    "next-auth": "^5.0.0-beta.32",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "server-only": "^0.0.1"

@@ -1564,7 +1564,11 @@ body:has(.rail) .main {
 /* The account menu's placeholder. It says in words that sign-in is not built, rather than
    rendering a control that does nothing (design contract: no dead UI). HC-003 replaces it. */
 .topbar-account {
-  margin-left: 1.5rem;
+  /* `auto` on BOTH this and `.topnav-wide`. With a navigation present the free space splits
+     between them, which is the layout HC-002 settled on. With no navigation - a person signed in
+     with no role - this is the only auto margin left, so the control goes to the right edge where
+     it belongs instead of sitting against the wordmark. Found by screenshotting that state. */
+  margin-left: auto;
   font-family: var(--font-sans);
   font-size: var(--fs-meta);
   color: var(--color-ink-muted);
@@ -1680,3 +1684,10 @@ body:has(.rail) .main {
 }
 
 .topbar .wordmark-sub { padding-top: 0.18rem; }
+
+/* The primary door fills its column; the secondary one below the fields deliberately does not,
+   so the two do not read as an equal pair of choices (fountainbridge FB-189 made the same call). */
+.signin-wide { width: 100%; }
+
+/* The top bar's rule is scoped to `.topbar` so it cannot reach the sign-in screen, which draws its
+   own with `.signin .wordmark-rule`. Two rules on one wordmark would be a box. */

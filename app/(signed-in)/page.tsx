@@ -1,4 +1,7 @@
+import { redirect } from 'next/navigation';
 import { TONE_MEANING, TONES } from '@/lib/status';
+import { landingFor, seesGroupLedger } from '@/lib/nav';
+import { currentPrincipal } from '@/lib/session';
 
 /**
  * The placeholder home page.
@@ -11,7 +14,14 @@ import { TONE_MEANING, TONES } from '@/lib/status';
  * placeholder that shows plausible-looking figures is how a screen comes to be judged against
  * numbers nobody ever computed.
  */
-export default function Home() {
+export default async function Home() {
+  // The root routes by role rather than refusing. See `landingFor` in lib/nav.ts for why this one
+  // page is different from the other four: everybody arrives here after signing in, so a refusal
+  // means signing in produces a 404.
+  const principal = await currentPrincipal();
+  if (!principal) redirect('/not-authorized');
+  if (!seesGroupLedger(principal.role)) redirect(landingFor(principal.role));
+
   return (
     <div className="measure">
       <p className="eyebrow">Phase 0</p>

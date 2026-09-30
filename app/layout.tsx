@@ -3,8 +3,10 @@ import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 import { Source_Serif_4, Inter, IBM_Plex_Mono } from 'next/font/google';
 import Link from 'next/link';
-import { navFor, WORDMARK, type Role } from '@/lib/nav';
+import { navFor, WORDMARK } from '@/lib/nav';
 import { TopNav } from '@/components/TopNav';
+import { currentResolution } from '@/lib/session';
+import { signOut } from '@/auth';
 
 // The three Bruntsfield typefaces, from one source. `next/font/google` self-hosts them at build
 // time, so there is no second font source and no request to a third party on page load.
@@ -21,20 +23,22 @@ export const metadata: Metadata = {
 export const viewport: Viewport = { width: 'device-width', initialScale: 1 };
 
 /**
- * The stub principal.
+ * HC-002 rendered this shell for a hard-coded admin, as a named `STUB_ROLE` constant so it could
+ * not be missed. HC-003 has removed it: the navigation is now the real signed-in person's, resolved
+ * server-side on every request by `lib/authz.ts`.
  *
- * HC-003 replaces this with the signed-in person, resolved by `lib/authz.ts`. Until then the shell
- * renders as an admin, because a shell with no navigation tells you nothing about whether the shell
- * works, and the point of this ticket is a shell somebody can look at.
- *
- * It is a named constant rather than an inline literal SO THAT IT IS GREPPABLE. An HC-003 that
- * misses one of these leaves a screen permanently signed in as an administrator, which is the kind
- * of thing that is obvious in a diff and invisible in a running app.
+ * Three states, and the top bar is honest about each:
+ *   - a principal: their sections, and a way to sign out.
+ *   - signed in with no role: no sections at all, because there is nothing they may open. The bar
+ *     still offers sign-out, so somebody who used the wrong account is not stuck.
+ *   - signed out: the wordmark alone. Only `/login` and `/not-authorized` render in this state;
+ *     everything else is redirected by the middleware before it reaches here.
  */
-const STUB_ROLE: Role = 'admin';
-
-export default function RootLayout({ children }: { children: ReactNode }) {
-  const entries = navFor(STUB_ROLE);
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const resolution = await currentResolution();
+  const principal = resolution.kind === 'principal' ? resolution.principal : null;
+  const signedIn = resolution.kind === 'principal' || resolution.kind === 'no-role';
+  const entries = principal ? navFor(principal.role) : [];
 
   return (
     <html lang="en" className={`${serif.variable} ${sans.variable} ${mono.variable}`}>
@@ -50,13 +54,24 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               already says it. Looking at the rendered bar is what caught it: the same three words
               appeared three times inside the top 180 pixels, counting the page heading. The eyebrow
               is the one that carries no information, so it is the one that goes. */}
-          <TopNav entries={entries} />
-          {/* The account menu is a placeholder until HC-003 has an account to show. It says so in
-              words rather than rendering an empty control, because a control that does nothing is
-              worse than one that is not there (design contract: no dead UI). */}
-          <span className="topbar-account" data-testid="account-menu-placeholder">
-            Sign-in arrives with HC-003
-          </span>
+          {entries.length > 0 ? <TopNav entries={entries} /> : null}
+          {signedIn ? (
+            <form
+              className="topbar-account"
+              data-testid="account-menu"
+              action={async () => {
+                'use server';
+                await signOut({ redirectTo: '/login' });
+              }}
+            >
+              {/* The address is the title rather than the label: on a narrow bar a long address
+                  either wraps the header or pushes the sections off the end, and neither is worth
+                  it to show somebody the account they are already using. */}
+              <button className="btn btn-ghost" type="submit" title={principal?.email ?? undefined}>
+                {principal ? principal.role : 'no role'} · Sign out
+              </button>
+            </form>
+          ) : null}
         </header>
         <main className="main">{children}</main>
       </body>
