@@ -17,7 +17,7 @@ from John. HC-002 is next and in progress.
 | HC-002 | App shell: Next.js, the Bruntsfield tokens, the top bar, design-lint, the glossary | Done |
 | HC-003 | Sign-in: Google and the password door, roles, the admin allowlist, server-side scoping | Done |
 | HC-004 | The data layer: Postgres on Railway, migrations, one repository, PGLite for tests | Done |
-| HC-005 | bcap-contracts for the hub: new types, vendored schemas, generated TypeScript, a parity check | Todo |
+| HC-005 | bcap-contracts for the hub: new types, vendored schemas, generated TypeScript, a parity check | Done |
 | HC-006 | The UI gate: Playwright, the screenshot gallery, the design-conformance scorecard | Todo |
 | HC-007 | Deploy: the Railway service, health, the domain, the OAuth client, the env table | Todo |
 | HC-008 | Seed and fixtures: the commercial record as data, and a demo mode | Todo |

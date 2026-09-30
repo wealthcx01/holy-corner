@@ -1,0 +1,108 @@
+/* eslint-disable */
+/**
+ * GENERATED FILE. DO NOT EDIT.
+ *
+ * Produced by `node scripts/generate-types.mjs` from the JSON Schemas vendored in `schema/`,
+ * which come from `packages/bcap_contracts` in the grassmarket repository.
+ *
+ *   package version : 0.3.0
+ *   source commit   : 7f75646b2632e622a6760bf06f56b91402e57602
+ *
+ * A change to any of these shapes is made in that package and re-vendored, never here. Editing
+ * this file turns the "Contracts parity" check red on the next run, which is what it is for
+ * (CLAUDE.md #6: do not hand-author a parallel type).
+ */
+
+/**
+ * How this figure was arrived at, in words a person can check against the contract: which rate, which window, which report. A computed number with no stated basis is one nobody can defend in an audit, and both advisory agreements grant an audit right.
+ */
+export type Basis = string;
+/**
+ * Amount in integer minor units (e.g. cents). Never a float: a float cannot hold 0.1 exactly, and a commission recomputed on one drifts every time.
+ */
+export type AmountMinor = number;
+export type Currency = 'GBP' | 'USD' | 'EUR' | 'CHF' | 'HKD';
+/**
+ * Where this amount was read from, precisely enough for somebody to check it against the document: a contract clause, an invoice number, a statement line. Mandatory, for the same reason Money's assumption reference is: an amount with no provenance is a claim, and this record exists to hold facts.
+ */
+export type SourceRef = string;
+export type ContractId = string;
+export type ContractTermRef = string | null;
+/**
+ * Counted from first cash received on the deal.
+ */
+export type ContractYear = number;
+/**
+ * The partner's own deal this commission arises from.
+ */
+export type CustomerDealRef = string | null;
+export type Id = string;
+export type ReceivableStatus = 'forecast' | 'due' | 'invoiced' | 'paid' | 'written_off';
+
+/**
+ * What a partner owes us for one reported tranche of their customer's cash.
+ *
+ * `contract_year` is the year OF THE ENGAGEMENT, counted from first cash received, not a calendar
+ * year and not a year of the agreement. Two rates apply depending on it, so a wrong year here is a
+ * wrong invoice.
+ */
+export interface CommissionReceivable {
+  basis: Basis;
+  cash_received: RecordedAmount;
+  computed: RecordedAmount1;
+  contract_id: ContractId;
+  contract_term_ref?: ContractTermRef;
+  contract_year: ContractYear;
+  customer_deal_ref?: CustomerDealRef;
+  /**
+   * Where a creditable commitment payment reduces this one, by how much.
+   */
+  drawdown_applied?: RecordedAmount2 | null;
+  id: Id;
+  status?: ReceivableStatus;
+}
+/**
+ * What the partner reported receiving from their customer.
+ */
+export interface RecordedAmount {
+  amount_minor: AmountMinor;
+  currency: Currency;
+  source_ref: SourceRef;
+}
+/**
+ * What we are owed on that cash, at the year's rate.
+ */
+export interface RecordedAmount1 {
+  amount_minor: AmountMinor;
+  currency: Currency;
+  source_ref: SourceRef;
+}
+/**
+ * An amount that is a FACT on a document, not a figure under assumptions (HC-005).
+ *
+ * ``Money`` above cannot be constructed without an ``assumption_register_ref``, and that is
+ * correct for what it is for: a lever NPV or a remediation cost is only meaningful under stated
+ * assumptions, and ADR-0002 exists because the prototype subtracted pounds from score-points.
+ *
+ * Holy Corner needs the other kind. ``USD 5,000`` on invoice INV-001 is not modelled, not
+ * uncertain and not an assumption. It is written on a document somebody signed. Putting it in a
+ * field named ``assumption_register_ref`` would say the opposite of what is true, and a field used
+ * against its own name is how a wrong number survives review: the next reader believes the name.
+ *
+ * So the two types are distinguished by WHERE THE NUMBER CAME FROM, which is the thing that
+ * actually differs:
+ *
+ * * ``Money`` cites the assumptions that justify a modelled figure.
+ * * ``RecordedAmount`` cites the source it was read from - a contract clause, an invoice, a
+ *   partner's cash report, a bank statement line.
+ *
+ * Both are integer minor units with an explicit currency, and neither can exist without
+ * provenance. Neither converts to the other, and this package defines no function that takes one
+ * and returns the other: a modelled figure and an observed one are not interchangeable just
+ * because both are denominated in pounds.
+ */
+export interface RecordedAmount2 {
+  amount_minor: AmountMinor;
+  currency: Currency;
+  source_ref: SourceRef;
+}

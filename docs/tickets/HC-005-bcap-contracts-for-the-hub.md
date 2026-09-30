@@ -1,6 +1,6 @@
 # HC-005 — bcap-contracts for the hub: new types, vendored schemas, generated TypeScript, a parity check
 
-**Status:** Todo · **Phase:** 0 · **Depends on:** HC-004 · **Repo:** holy-corner, plus grassmarket
+**Status:** Done · **Phase:** 0 · **Depends on:** HC-004 · **Repo:** holy-corner, plus grassmarket
 (`packages/bcap_contracts` only) · **Branch:** `hc-005-bcap-contracts-for-the-hub` here and a
 companion `hc-005-hub-contracts` PR into grassmarket · One ticket = one branch = one PR per repo.
 
@@ -75,13 +75,76 @@ hand-typed, because both studios hand-typed theirs and both drifted.
 
 ## Acceptance criteria
 
-- [ ] grassmarket CI is green on the companion PR; its schema-parity step passes; version 0.3.0.
-- [ ] `make contracts-parity` here passes, and fails when a schema file is edited by hand.
-- [ ] A test constructs a `Contract` with the OpenBB terms from `docs/commercial-record.md` and the
-      Reset terms (equity, milestone, long-stop) and validates both with ajv against the schemas.
-- [ ] No hand-written TypeScript type in this repo duplicates a package model.
+- [x] grassmarket: version 0.3.0, schema parity passes, **1,948 tests passed and 1 skipped** with
+      nothing existing broken. ruff, ruff format and pyright all clean on the new code.
+- [x] `make contracts-parity` passes, and fails when a generated file is edited by hand — proved by
+      appending a line, watching it name the file, and regenerating.
+- [x] A test constructs an advisory `Contract` (two commission structures, a commitment payment,
+      payment terms) and a Foundry one (milestone, equity split, long-stop) and validates both with
+      ajv against the vendored schemas. **The figures are deliberately fictional** — see below.
+- [x] No hand-written TypeScript type duplicates a package model, **enforced by a test** that walks
+      `lib/`, `app/` and `components/` and fails on any declaration of a contract's name outside
+      `lib/contracts/`. It found one on its first run.
 
 ## Verification
 
 `/review` on both PRs. `uv run pytest packages/bcap_contracts` in grassmarket;
 `make contracts-parity && npm test` here.
+
+
+## What building it turned up
+
+**`Money` could not carry an invoice, and finding out why was the most useful hour of this ticket.**
+The package's `Money` cannot be constructed without an `assumption_register_ref`, and its own
+docstring says a `Money` without one "is not constructible". That is correct for what it is for: a
+lever NPV is only meaningful under stated assumptions, and grassmarket's ADR-0002 exists because the
+prototype subtracted pounds from score-points.
+
+An invoice is the other kind. USD 5,000 owed is not modelled, not uncertain, and not an assumption.
+It is written on a document somebody signed. Putting it in a field named `assumption_register_ref`
+would say the opposite of what is true, and a field used against its own name is how a wrong number
+survives review: the next reader believes the name.
+
+So `RecordedAmount` sits beside `Money` and is distinguished by WHERE THE NUMBER CAME FROM, which is
+what actually differs. `Money` cites the assumptions behind a modelled figure; `RecordedAmount` cites
+the source an observed one was read from. Both are integer minor units with a currency, neither can
+exist without provenance, and nothing converts one to the other.
+
+**This repo already had a third type called `Money`, and the new test caught it.** HC-004's
+`lib/money.ts` declared `Money` for arithmetic, and the package declares `Money` for a modelled
+figure. Two types with one name meaning different things is exactly the drift CLAUDE.md #6 names by
+filename, arrived at here within one ticket of writing the rule down.
+
+The local one is now `Amount`, and the distinction is real rather than cosmetic: arithmetic needs a
+type that carries NO provenance, because the subtotal half way through summing an invoice has no
+source document and no assumption register. Forcing it to carry one would mean inventing a source,
+and an invented provenance is worse than none because it looks like an answer. `toRecordedAmount`
+and `fromRecordedAmount` cross the boundary, and the caller supplies the source at the point they
+actually know it.
+
+**Generating the TypeScript took three attempts, and the first two are worth recording.** Compiling
+all twenty-four schemas nested under one `$defs` broke every schema's own internal `$ref`: a pointer
+like `#/$defs/ActorKind` stops resolving the moment its file is not the document root. Compiling
+them separately and concatenating produced duplicate identifiers, because `Kind`, `Months`,
+`Provisional` and `RestraintType` each exist in several contracts and `kind` is a different literal
+type in every term. One module per contract has neither problem. `lib/contracts/index.ts` re-exports
+the twenty-four by name, which is the only surface anything imports from.
+
+**Ten existing schemas are in the grassmarket diff.** `Currency` gained `CHF` and `HKD`, and it is
+embedded in several contracts, so each of those regenerated with exactly two new enum members and
+nothing else.
+
+## Why the test figures are invented
+
+HC-005 asks for a test built from the real commercial record. **The figures in both repositories'
+tests are deliberately fictional and the structures are real.**
+
+Both repositories are public. HC-056 exists to get Bruntsfield's negotiated commission rates,
+commitment amounts and equity terms OUT of public repositories, because both advisory agreements
+carry a Most-Favoured-Nation clause. Copying them into a test would add two more places to scrub and
+work directly against that ticket, for nothing: what needs proving is that the shapes carry the real
+record, and a shape is proved by its structure rather than by its values.
+
+The assertion that the actual terms are representable belongs with the actual terms, which after
+HC-056 is not a public repository. HC-008's operator script is where they are typed, once, by a
+person.

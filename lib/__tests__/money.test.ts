@@ -1,41 +1,41 @@
 import { describe, expect, it } from 'vitest';
 import {
-  CurrencyMismatch, NotAnAmount, add, allocate, applyBasisPoints, format, minorUnitsPerMajor,
-  money, roundHalfToEven, subtract, sum, zero,
+  CurrencyMismatch, NotAnAmount, add, allocate, amount, applyBasisPoints, format,
+  fromRecordedAmount, minorUnitsPerMajor, roundHalfToEven, subtract, sum, toRecordedAmount, zero,
 } from '../money';
 
-const usd = (n: number) => money(n, 'USD');
+const usd = (n: number) => amount(n, 'USD');
 
 describe('an amount is an integer of minor units with a currency', () => {
   it('refuses major units, which is the mistake that looks right', () => {
-    // money(50.00, 'USD') meaning fifty dollars is the one a person actually makes.
-    expect(() => money(50.5, 'USD')).toThrow(NotAnAmount);
-    expect(() => money(0.1, 'USD')).toThrow(NotAnAmount);
+    // amount(50.00, 'USD') meaning fifty dollars is the one a person actually makes.
+    expect(() => amount(50.5, 'USD')).toThrow(NotAnAmount);
+    expect(() => amount(0.1, 'USD')).toThrow(NotAnAmount);
   });
 
   it('refuses something that is not a currency code', () => {
-    for (const bad of ['', 'US', 'DOLLARS', 'usd!']) expect(() => money(1, bad), bad).toThrow(NotAnAmount);
+    for (const bad of ['', 'US', 'DOLLARS', 'usd!']) expect(() => amount(1, bad), bad).toThrow(NotAnAmount);
   });
 
   it('normalises the code so usd and USD are the same currency', () => {
-    expect(money(1, 'usd').currency).toBe('USD');
-    expect(() => add(money(1, 'usd'), money(1, 'USD'))).not.toThrow();
+    expect(amount(1, 'usd').currency).toBe('USD');
+    expect(() => add(amount(1, 'usd'), amount(1, 'USD'))).not.toThrow();
   });
 
   it('refuses an amount beyond safe integer range', () => {
-    expect(() => money(Number.MAX_SAFE_INTEGER + 2, 'USD')).toThrow(NotAnAmount);
+    expect(() => amount(Number.MAX_SAFE_INTEGER + 2, 'USD')).toThrow(NotAnAmount);
   });
 });
 
 describe('two currencies never end up in one sum', () => {
   it('throws rather than converting or picking one', () => {
-    expect(() => add(usd(100), money(100, 'GBP'))).toThrow(CurrencyMismatch);
-    expect(() => subtract(usd(100), money(100, 'GBP'))).toThrow(CurrencyMismatch);
-    expect(() => sum([usd(100), money(100, 'GBP')])).toThrow(CurrencyMismatch);
+    expect(() => add(usd(100), amount(100, 'GBP'))).toThrow(CurrencyMismatch);
+    expect(() => subtract(usd(100), amount(100, 'GBP'))).toThrow(CurrencyMismatch);
+    expect(() => sum([usd(100), amount(100, 'GBP')])).toThrow(CurrencyMismatch);
   });
 
   it('says why, in a message a person can act on', () => {
-    expect(() => add(usd(1), money(1, 'GBP'))).toThrow(/FX rate/);
+    expect(() => add(usd(1), amount(1, 'GBP'))).toThrow(/FX rate/);
   });
 
   it('an empty sum needs a currency, because zero of nothing is not a number either', () => {
@@ -101,7 +101,7 @@ describe('a split adds back up to exactly what was split', () => {
   });
 
   it('keeps every part in the original currency', () => {
-    for (const p of allocate(money(100, 'CHF'), [1, 1])) expect(p.currency).toBe('CHF');
+    for (const p of allocate(amount(100, 'CHF'), [1, 1])) expect(p.currency).toBe('CHF');
   });
 
   it('refuses weights that cannot divide anything', () => {
@@ -118,12 +118,34 @@ describe('rendering an amount', () => {
     // hundredth of its value.
     expect(minorUnitsPerMajor('USD')).toBe(100);
     expect(minorUnitsPerMajor('JPY')).toBe(1);
-    expect(format(money(1000, 'JPY'))).toContain('1,000');
+    expect(format(amount(1000, 'JPY'))).toContain('1,000');
     expect(format(usd(1000))).toContain('10.00');
   });
 
   it('shows the code, because this product puts three currencies on one page', () => {
     expect(format(usd(500_000))).toMatch(/USD/);
-    expect(format(money(500_000, 'GBP'))).toMatch(/GBP/);
+    expect(format(amount(500_000, 'GBP'))).toMatch(/GBP/);
+  });
+});
+
+describe('the boundary with the contract types', () => {
+  it('adds the provenance the record requires, at the point somebody knows it', () => {
+    // An Amount is arithmetic and carries no source; a RecordedAmount is storage and must. The
+    // caller supplies the source here, because they are the one who knows where the figure is from.
+    expect(toRecordedAmount(usd(123456), 'INV-9')).toEqual({
+      amount_minor: 123456,
+      currency: 'USD',
+      source_ref: 'INV-9',
+    });
+  });
+
+  it('refuses to invent a source', () => {
+    // An invented provenance is worse than none, because it looks like an answer.
+    expect(() => toRecordedAmount(usd(1), '   ')).toThrow(NotAnAmount);
+  });
+
+  it('comes back the other way for arithmetic on something read out of the record', () => {
+    const roundTripped = fromRecordedAmount(toRecordedAmount(usd(500), 'INV-9'));
+    expect(roundTripped).toEqual(usd(500));
   });
 });
