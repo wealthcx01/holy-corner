@@ -1,6 +1,6 @@
 # HC-002 — App shell: Next.js, the Bruntsfield tokens, the top bar, design-lint, the glossary
 
-**Status:** Todo · **Phase:** 0 · **Depends on:** HC-001 · **Repo:** holy-corner ·
+**Status:** Done · **Phase:** 0 · **Depends on:** HC-001 · **Repo:** holy-corner ·
 **Branch:** `hc-002-app-shell-and-the-bruntsfield-tokens` · One ticket = one branch = one PR.
 
 ## Why this matters (for John)
@@ -50,13 +50,60 @@ ticket puts that file here unchanged and adds the lint that stops anyone driftin
 
 ## Acceptance criteria
 
-- [ ] `npm run build` passes; the shell renders at `/` with the wordmark, nav and fonts loaded.
-- [ ] `make design-lint` passes, and fails on a fixture component with a raw `#hex`.
-- [ ] Rendered beside fountainbridge's `/login` and grassmarket's `/login` at 1440×1000 and
-      393×851: same paper, same green, same type. Four screenshots in the PR with heights.
-- [ ] No Tailwind, no CSS-in-JS, no second font source.
+- [x] `npm run build` passes; the shell renders at `/` with the wordmark, nav and fonts loaded.
+- [x] `make design-lint` passes (9 files clean), and fails on a fixture component with a raw
+      `#hex` — proved by adding one and watching the build go red, then removing it.
+- [x] Rendered beside fountainbridge's `/login` and grassmarket's `/login` at 1440×1000 and
+      393×851. Same paper, same Bottle Green, same three typefaces. Heights in the PR.
+- [x] No Tailwind, no CSS-in-JS, no second font source. `next/font/google` self-hosts all three
+      faces at build time, so no request leaves the page for a font.
 
 ## Verification
 
 `/review` + `/qa` + the side-by-side screenshots.
 `npm run lint && npm run typecheck && npm test && make design-lint`.
+
+
+## What looking at the screen turned up
+
+Three things, none of which any automated gate can see. This is the ticket where CLAUDE.md #11
+starts doing work, and it earned its place on the first screen.
+
+**FB-124, reproduced.** The top bar offers five sections and four of them had no page. Next.js
+prefetches nav destinations, so every page load fired four 404s before anyone clicked anything.
+That is fountainbridge's *"dead nav row 404-ing on every page load"* exactly, the defect CLAUDE.md
+#11 was written about, arrived at independently and within an hour of the navigation existing.
+
+The fix is an honest page per section saying what it will hold and which ticket builds it. Hiding
+the four links until their tickets land was the obvious alternative and it is worse: the sections
+ARE the shape of this product, and a navigation that grows one item at a time never gets judged as
+a whole. A reader should be able to see where things will be.
+
+**The same three words, three times, inside 180 pixels.** The bar carried an eyebrow reading
+"Bruntsfield OS" a few centimetres from where the wordmark already said it, and the page heading
+said it again. Fountainbridge's equivalent eyebrow says "Foundry Studio" beside a wordmark reading
+"Bruntsfield / Foundry", so it adds a word; ours repeated one. The eyebrow is gone and the top bar
+now reads wordmark, sections, account.
+
+**A wordmark that read as truncated.** Fountainbridge stacks BRUNTSFIELD over FOUNDRY and
+grassmarket over ADVISORY, and both second lines are long enough to sit under the first as one
+mark. "OS" is two characters, and stacked plain under an eleven-character word it looked like a
+subtitle that had been cut off rather than part of a lockup. It now sits under the hairline rule
+the Bruntsfield sign-in lockup already uses (FB-189: *a serif caps wordmark over a hairline rule*).
+
+**This is still the weakest comparison in the project and the pull request says so.** There is no
+Claude Design artefact for Holy Corner, so the "design" side was the matching screen in each
+sibling studio. That checks whether the three read as one product. It does not check whether this
+is the right screen. HC-030 produces the first real design artefact.
+
+## The readings
+
+| Screen | Desktop 1440×1000 | Phone 393×851 |
+|---|---|---|
+| `/` | 1,000px | 954px |
+| `/money` (a placeholder section) | 1,000px | 851px |
+| fountainbridge `/login`, for comparison | 1,000px | 851px |
+| grassmarket `/login`, for comparison | 1,000px | 851px |
+
+Neither Holy Corner screen drags sideways at 393px, and neither logs a console error. The drawer
+opens on a phone and all five of its links navigate, checked one at a time rather than assumed.
