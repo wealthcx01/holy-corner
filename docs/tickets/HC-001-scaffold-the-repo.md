@@ -3,9 +3,9 @@
 **Status:** Done · **Phase:** 0 · **Depends on:** — · **Repo:** holy-corner ·
 **Branch:** `hc-001-scaffold-the-repo` · One ticket = one branch = one PR.
 
-**Shipped in part:** the repository is not registered as a gbrain source, because a running
-`gbrain serve` still holds the PGLite single-writer lock. Everything else in this ticket is done.
-Branch protection WAS blocked and is now applied; see the amended criterion below.
+**Closed out on 30 September 2026.** Everything in this ticket is done. Two items finished after
+the pull request merged, because both were blocked by things outside the repository: branch
+protection (see the amended criterion) and the gbrain source registration (see below).
 
 ## Why this matters (for John)
 
@@ -80,10 +80,12 @@ them in.
 - [x] `gbrain search "holy corner lane opening"` returns the note on the VM.
 - [x] `~/projects/holy-corner` exists on the VM at `origin/main`.
 - [x] The Railway project exists with a Postgres add-on and no running deploy.
-- [ ] **The repository is registered as a gbrain source.** *Not done.* A running `gbrain serve`
-      (PID 1998533) holds the PGLite single-writer lock, so `gbrain sources list` times out. The
-      lane-opening note itself is written and searchable, which is what this ticket needed gbrain
-      for. Registering the source is a minute's work once that process is stopped.
+- [x] **The repository is registered as a gbrain source.** Done on 30 September 2026. It was
+      blocked for three weeks by another Claude session's `gbrain serve` holding the PGLite
+      single-writer lock, which locked out every command, reads included. That process is gone and
+      gbrain is now on 0.57.0.0. Registered federated, so it answers cross-source searches, and
+      synced: **69 pages, 141 chunks, checkpoint f993fb8**. `gbrain search "approval gate signed
+      event log" --source holy-corner` returns HC-042.
 
 ## Verification
 
@@ -220,3 +222,30 @@ which until afterwards.
 it reports a clean fast-forward whether the branch is protected or not. It reported success both
 before protection was applied and after. An earlier comment on the pull request cited it as
 evidence; that comment has been corrected.
+
+
+## What closing the gbrain step turned up
+
+Two things worth carrying into HC-045, which owns memory properly.
+
+**The lock was never gbrain's fault, and stopping the process was never the only way out.** gbrain
+runs on PGLite, which allows exactly one writer. A `gbrain serve` MCP server belonging to another
+Claude session held that lock continuously from 12:50 on 9 September, and while it did, EVERY
+command timed out. Not just writes. The lane-opening note only got in because it was written
+eighteen minutes before that process started. The three ways out, in order of preference: do the
+work from the session that already holds the lock, because it has gbrain as an MCP server and needs
+no CLI at all; move the brain off PGLite to a multi-writer engine with `gbrain migrate --to
+supabase`, which fixes it for the fountainbridge and grassmarket lanes too; or stop the process,
+which is the crudest and breaks whoever is using it. HC-045 should record the migration as the real
+answer, because this will happen again.
+
+**gbrain indexes the frozen fixtures alongside the live tickets, and it surfaces them.** Searching
+for "approval gate signed event log" returns
+`tools/ticket-parser/fixtures/real/holy-corner/hc-042-the-approval-gate` ABOVE the real
+`docs/tickets/HC-042-the-approval-gate.md`. The fixtures are frozen copies on purpose
+(`tools/ticket-parser/fixtures/README.md` explains why), but nothing told gbrain that, so a search
+can answer a question about this project with a stale snapshot and look entirely convincing doing
+it. The review of this ticket already flagged the duplication as a maintenance cost. This is a
+second, worse cost, and it lands on the composer in HC-041, which will read from the same index.
+Either exclude `tools/ticket-parser/fixtures/` from the gbrain source, or drop the duplicated
+Holy Corner copies. HC-045's problem, named here so it is not rediscovered.

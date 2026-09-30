@@ -4,16 +4,16 @@ Detail lives in `docs/tickets/`. Status here mirrors each ticket's `**Status:**`
 `make ticket-drift` fails CI when the two disagree with git. Ticket numbers are allocated as
 `max(existing)+1` at filing time.
 
-Last reconciled: 2026-09-09. HC-001 has merged and is shipped in part: only the gbrain source
-registration is outstanding, blocked by a held PGLite lock. HC-054 is superseded, because the
-repository went public and branch protection became available. HC-055 and HC-056 are open and each
-needs a decision from John.
+Last reconciled: 2026-09-30. HC-001 is fully done: branch protection is applied and the repository
+is registered and synced as a gbrain source. HC-054 is superseded, because the repository went
+public and branch protection became available. HC-055 and HC-056 are open and each needs a decision
+from John. HC-002 is next and in progress.
 
 ## Phase 0 — Foundations
 
 | Ticket | Title | Status |
 |---|---|---|
-| HC-001 | Scaffold the repo: CI, branch protection, gstack, gbrain, the VM lane, a Railway skeleton | Done — shipped in part: gbrain source registration is blocked by the PGLite lock |
+| HC-001 | Scaffold the repo: CI, branch protection, gstack, gbrain, the VM lane, a Railway skeleton | Done |
 | HC-002 | App shell: Next.js, the Bruntsfield tokens, the top bar, design-lint, the glossary | Todo |
 | HC-003 | Sign-in: Google and the password door, roles, the admin allowlist, server-side scoping | Todo |
 | HC-004 | The data layer: Postgres on Railway, migrations, one repository, PGLite for tests | Todo |

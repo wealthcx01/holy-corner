@@ -55,7 +55,7 @@ function tickets() {
 function evidence() {
   let log;
   try {
-    log = git(['log', BRANCH, '--name-only', '--format=%x00%h%x1f%s%x1f%x1f']);
+    log = git(['log', BRANCH, '--name-status', '--format=%x00%h%x1f%s%x1f%x1f']);
   } catch {
     // A shallow clone or a missing remote ref: say so rather than passing silently, because a check
     // that quietly does nothing is indistinguishable from a check that found nothing.
@@ -70,9 +70,23 @@ function evidence() {
   for (const record of log.split('\x00').slice(1)) {
     const [sha, subject, , files = ''] = record.split('\x1f');
     if (!sha) continue;
-    const paths = files.split('\n').map((p) => p.trim()).filter(Boolean);
+    // `--name-status` gives "<status>\t<path>" per line (and "R100\told\tnew" for a rename, whose
+    // NEW path is the last field). HC-057 needs the status, to tell a file this commit added from
+    // one it merely touched.
+    const entries = files
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => {
+        const parts = line.split('\t');
+        return { status: parts[0] ?? '', path: parts[parts.length - 1] ?? '' };
+      })
+      .filter((e) => e.path !== '');
+    const paths = entries.map((e) => e.path);
+    // A rename that lands a ticket file is a move, not a filing, so only a plain add counts.
+    const addedPaths = entries.filter((e) => e.status === 'A').map((e) => e.path);
 
-    for (const id of ticketsShippedBy({ subject, paths })) {
+    for (const id of ticketsShippedBy({ subject, paths, addedPaths })) {
       if (shipped.has(id)) continue;   // keep the newest commit, which is the one being walked first
       shipped.add(id);
       commitFor.set(id, `${sha} ${subject.trim()}`);

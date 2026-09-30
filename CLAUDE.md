@@ -43,6 +43,10 @@ there; nothing here relaxes them.
    branch names are `hc-nnn-slug`. Work only the ticket on the branch. Discovered work becomes a new
    ticket file in the PR or a follow-up — never scope creep. Ticket numbers come from
    `max(existing)+1`, read from the directory at filing time, never `HC-NEW` (fountainbridge FB-097).
+   **A commit subject names the ticket it SHIPS.** A ticket the commit merely files belongs in the
+   body. `ticket-drift` reads subjects to decide what shipped, and it now ignores a ticket whose file
+   that same commit added (HC-057), so getting this wrong is no longer load-bearing. It is still the
+   convention, because the subject is what a person reads first.
 2. **Merge on green; gate externally, not internally.** A PR merges once CI is green (lint +
    typecheck + test + build + design contract + ticket drift + the **Playwright UI gate**, which is a
    required check from day one) and it has passed `/review`. `main` is branch-protected server-side:
