@@ -69,3 +69,43 @@ export const WORDMARK = { name: 'Bruntsfield', sub: 'OS' } as const;
 export function navUsesPlainEnglish(entries: readonly NavEntry[] = ALL): string[] {
   return entries.filter((e) => offendingWords(`${e.label} ${e.blurb}`).length > 0).map((e) => e.label);
 }
+
+/**
+ * Where a role lands after signing in.
+ *
+ * THE ROOT IS SPECIAL and does not follow the 404 rule the other sections do. `/` holds the group
+ * ledger, which only `admin` and `exec` may read, but it is also where every sign-in arrives. The
+ * first build refused it for `finance` and `staff`, correctly by the section rule, and the result
+ * was that signing in as either of them produced a 404 page. Found by screenshotting the four
+ * roles: their heights came back 1,188px instead of 1,000px, because the picture was of an error.
+ *
+ * HC-030 settles it in words: "`finance` lands on **Money**; `staff` on their pillar; only `admin`
+ * and `exec` see the ledger". So the root REDIRECTS rather than refusing, and it redirects to the
+ * first section that role actually has, which is `navFor`'s answer and not a second list.
+ *
+ * Redirecting leaks nothing. It says where this person can go, not what is on the page they cannot.
+ */
+export function landingFor(role: Role): string {
+  switch (role) {
+    case 'admin':
+    case 'exec':
+      return '/';
+    // NAMED, not derived from the first entry in the navigation. HC-030 says "finance lands on
+    // Money", and the first entry finance holds is The record, so deriving it sent them to the
+    // wrong place. The order of the navigation is a reading order; where somebody starts work is a
+    // separate decision and the plan makes it.
+    case 'finance':
+      return '/money';
+    case 'staff':
+      return '/record';
+    default: {
+      const exhaustive: never = role;
+      return exhaustive;
+    }
+  }
+}
+
+/** Does this role get the group ledger at the root? */
+export function seesGroupLedger(role: Role): boolean {
+  return navFor(role).some((e) => e.href === '/');
+}

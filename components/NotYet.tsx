@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { landingFor, navFor, type Role } from '@/lib/nav';
 
 /**
  * A section that has a place in the navigation and nothing behind it yet.
@@ -16,7 +17,27 @@ import Link from 'next/link';
  * So the links work, and the page they reach says plainly what is not built and which ticket
  * builds it. A person is never told "not found" about a section the product just offered them.
  */
-export function NotYet({ title, ticket, what }: { title: string; ticket: string; what: string }) {
+export function NotYet({
+  title,
+  ticket,
+  what,
+  role,
+}: {
+  title: string;
+  ticket: string;
+  what: string;
+  role: Role;
+}) {
+  // The way back has to be somewhere this person can actually go. It read "Back to the group" for
+  // everybody until a staff account was screenshotted: staff cannot open the group, so the link
+  // bounced them to their own landing page while claiming to do something else. A link that does
+  // not do what it says is the dead-control problem wearing a label.
+  const back = landingFor(role);
+  // Lower-cased because it sits mid-sentence. "Back to The group" is a capital letter in the
+  // middle of a phrase; sentence case is the house rule (docs/STYLE-VOICE.md rule 5).
+  const label = navFor(role).find((e) => e.href === back)?.label ?? 'your work';
+  const backLabel = label.charAt(0).toLowerCase() + label.slice(1);
+
   return (
     <div className="measure">
       <p className="eyebrow">Not built yet</p>
@@ -27,7 +48,7 @@ export function NotYet({ title, ticket, what }: { title: string; ticket: string;
         the product is visible from the first screen, rather than appearing one item at a time.
       </div>
       <p>
-        <Link href="/">Back to the group</Link>
+        <Link href={back}>Back to {backLabel}</Link>
       </p>
     </div>
   );

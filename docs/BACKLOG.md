@@ -15,7 +15,7 @@ from John. HC-002 is next and in progress.
 |---|---|---|
 | HC-001 | Scaffold the repo: CI, branch protection, gstack, gbrain, the VM lane, a Railway skeleton | Done |
 | HC-002 | App shell: Next.js, the Bruntsfield tokens, the top bar, design-lint, the glossary | Done |
-| HC-003 | Sign-in: Google and the password door, roles, the admin allowlist, server-side scoping | Todo |
+| HC-003 | Sign-in: Google and the password door, roles, the admin allowlist, server-side scoping | Done |
 | HC-004 | The data layer: Postgres on Railway, migrations, one repository, PGLite for tests | Todo |
 | HC-005 | bcap-contracts for the hub: new types, vendored schemas, generated TypeScript, a parity check | Todo |
 | HC-006 | The UI gate: Playwright, the screenshot gallery, the design-conformance scorecard | Todo |
