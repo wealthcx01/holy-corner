@@ -20,6 +20,8 @@ const PORT = 3100;
 
 export default defineConfig({
   testDir: './e2e',
+  // Clears the readings manifest, so a run never reports a height from the run before it.
+  globalSetup: './e2e/global-setup.ts',
   // One worker, no parallelism. The specs sign in and out of one server and a screenshot taken
   // while another test is navigating is a picture of the wrong thing.
   fullyParallel: false,

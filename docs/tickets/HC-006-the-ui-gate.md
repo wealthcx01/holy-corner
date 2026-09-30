@@ -46,12 +46,14 @@ the browser run on every PR, makes the pictures an artefact, and makes "looked a
       shape ("finished work nobody needed to see") were appended to the group ledger, and the gate
       failed with `/ as admin is 5215px tall and its ceiling is 1100px`, followed by the sentence
       telling the reader which of the two decisions they now have to make. Reverted.
-- [ ] The gallery artefact downloads from a CI run and contains every numbered screenshot.
-      **Waiting on this PR's first CI run.**
+- [x] The gallery artefact downloads from a CI run and contains every numbered screenshot.
+      Downloaded from run 36771772528: all fourteen PNGs, `index.html`, `readings.jsonl` and the
+      Playwright report.
 - [x] `docs/design-conformance.md` has a row per screen with the date, both heights and who looked.
       Fourteen screenshots, nine screens, both sizes.
-- [ ] The job is in the branch-protection required list (screenshot in the PR). **Waiting on the
-      first green run**, because a check cannot be required until GitHub has seen it report once.
+- [x] The job is in the branch-protection required list. It was already there — HC-001 named all
+      ten jobs and HC-054 required them before any of them did anything, which is exactly why the
+      name could not be allowed to change. It is now required AND real.
 
 ## What the gate found on its first run
 
@@ -73,6 +75,13 @@ faults, same afternoon.
 
 Neither was visible to lint, typecheck, the 135 unit tests, `design-lint` or the build. All of them
 passed throughout, and each was right about the question it asked. None of them look.
+
+**Comparing the CI artefact against a local run found two more.** The manifest of readings was
+appended to and never cleared, so the deliberately-tall run used to prove the ceiling left a
+5,215px reading behind in it; a `globalSetup` now empties it at the start of every run. And the
+phone group ledger measures 980px in CI against 954px locally — same commit, different fonts
+installed, so text wraps one line differently. The CI number is the one recorded, and the reason
+ceilings need real headroom is written down in `docs/design-conformance.md`.
 
 **One more, found sideways and unrelated to screens:** `npm run db:migrate` runs under `bun`, which
 is not in this stack and is not on the Railway image, and `railway.json` calls it at boot. The

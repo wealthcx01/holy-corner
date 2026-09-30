@@ -32,17 +32,19 @@ supplement.
 
 ## The readings
 
-Taken **30 September 2026**, on the HC-006 branch, at commit of the pull request that added the
-gate. Looked at as pictures by John Gallagher and Claude. Ceilings are in `e2e/shell.spec.ts` and
-`e2e/mobile.spec.ts`.
+Taken **30 September 2026**, on the HC-006 branch. Looked at as pictures by John Gallagher and
+Claude. Ceilings are in `e2e/shell.spec.ts` and `e2e/mobile.spec.ts`.
+
+**These are the CI readings, and CI is what counts.** A reading taken on a developer's machine is
+not the same number — see "The same screen is not the same height everywhere" below.
 
 | Screen | Role | Desktop 1440×1000 | Phone 393×851 | Desktop ceiling | Phone ceiling |
 |---|---|---|---|---|---|
 | `/login` | signed out | 1,000px | 727px | 1,100px | 1,000px |
 | `/not-authorized` (no role) | signed in, no role | 1,000px | 727px | 1,100px | 1,000px |
 | `/not-authorized` (wrong domain) | `@gmail.com` | 1,000px | — | 1,100px | — |
-| `/` the group ledger | admin | 1,000px | 954px | 1,100px | 1,200px |
-| `/` with the drawer open | admin | — | 954px | — | 1,200px |
+| `/` the group ledger | admin | 1,000px | 980px | 1,100px | 1,200px |
+| `/` with the drawer open | admin | — | 980px | — | 1,200px |
 | `/record` | staff | 1,000px | 727px | 1,100px | 1,000px |
 | `/money` | finance | 1,000px | 727px | 1,100px | 1,000px |
 | `/needs-you` | admin | 1,000px | — | 1,100px | — |
@@ -53,7 +55,29 @@ Nothing in the product is tall enough to scroll at 1440×1000 yet, so the page h
 window height. That is what an empty Phase 0 should look like, and it means the desktop ceilings
 are currently untested by real content. They start earning their keep in Phase 1, when the record
 arrives and screens begin to have rows in them. The phone readings are real measurements: 727px
-and 954px are both shorter than the 851px viewport plus scroll, and both were looked at.
+and 980px are both real measurements of content, and both were looked at.
+
+## The same screen is not the same height everywhere
+
+The phone group ledger measures **980px in CI and 954px on a developer's Linux machine** — the same
+commit, the same viewport, a 26px difference, about 3%. Everything else agreed exactly.
+
+The cause is fonts. The runner and a local machine do not have the same faces installed, so the
+fallback differs, so text wraps at a different word, so a paragraph is one line taller. Nothing is
+wrong with either number; they are measurements of two slightly different renderings.
+
+Two things follow, and both matter more than the 26px does:
+
+- **The CI reading is the one recorded here**, because CI is the environment the gate runs in on
+  every pull request. A local reading is for looking at a screen, not for writing down.
+- **A ceiling set close to its reading will flap.** A screen measured at 980px under a ceiling of
+  1,000px would pass locally and fail in CI, which is the kind of red that teaches people to press
+  re-run. Leave real headroom. The current ceilings are 100px to 220px above their readings, which
+  is roughly ten times the variance seen here.
+
+This is worth re-checking if the product ever pins its own web fonts rather than relying on what
+the machine has. That would remove most of the difference, and it is HC-002's `app/globals.css`
+question rather than this document's.
 
 **There is no design to render beside these.** CLAUDE.md #11 asks for the comparison "where a
 design exists". Holy Corner has none — the branding is fountainbridge's `app/globals.css` carried
