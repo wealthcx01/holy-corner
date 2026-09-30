@@ -199,12 +199,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     # The vendored bcap-contracts schemas must regenerate to exactly the TypeScript in the tree.
-    # Both studios hand-wrote their types and both drifted. HC-005 makes it real.
+    # Both studios hand-wrote their types and both drifted (CLAUDE.md #6).
+    #
+    # THIS JOB NEEDS `npm ci`, and HC-001 wrote it without one. The job was modelled on the design
+    # contract above, which really is pure Node and reads files with no dependencies. This one
+    # generates TypeScript from JSON Schema and needs the generator, so HC-005 turned it red the
+    # moment it stopped being a no-op: ERR_MODULE_NOT_FOUND, in a job whose comment said no install
+    # was needed. A comment describing what a job used to need is the same defect as a comment
+    # describing what code used to do.
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - run: npm ci --no-audit --no-fund
       - name: Check generated types against the schemas
         run: make contracts-parity
 
