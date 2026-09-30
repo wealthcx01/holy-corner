@@ -4,7 +4,7 @@ import { auth } from '@/auth';
 import { navFor } from './nav';
 import {
   inMemoryRoles, parseEmailList, resolvePrincipal,
-  type Principal, type Resolution, type RoleAssignment,
+  type Principal, type Resolution, type RoleAssignment, type RoleSource,
 } from './authz';
 
 /**
@@ -15,13 +15,17 @@ import {
  */
 
 /**
- * Role assignments, until HC-004 has a table.
+ * Role assignments from the environment.
  *
- * `HC_ROLE_ASSIGNMENTS` is deliberately NOT in `.env.example` as a production variable and is not
- * documented as a way to run the product. It exists so the four roles can be exercised locally and
- * by HC-006's UI gate before there is a database. HC-004 replaces this function body with a query
- * and deletes the variable; nothing else in the codebase changes, because everything downstream
- * takes a `RoleSource`.
+ * HC-004 has the `people` table now, and `currentResolution` reads it FIRST. This remains for two
+ * cases that are not the database, and is documented in `.env.example` as neither production nor a
+ * way to run the product:
+ *
+ *   - local development and HC-006's UI gate, which drive the four roles without standing up
+ *     Postgres to do it;
+ *   - the window before somebody is IN the record. HC-003's rule is that a Bruntsfield identity
+ *     nobody has given a role to sees `/not-authorized`, and that is still what happens: this
+ *     variable is empty on a real deployment, so the environment grants nothing.
  *
  * Format: `email=role[:pillar|pillar]` entries, comma or whitespace separated.
  */
@@ -46,12 +50,43 @@ function roleSourceFromEnv() {
   return inMemoryRoles(entries);
 }
 
+/**
+ * The role source for ONE request.
+ *
+ * Reads the record for this one address and hands `resolvePrincipal` a source holding at most one
+ * entry. That is why `RoleSource` is synchronous: the lookup happens here, once, with the address
+ * already known, rather than being an awaitable call that a caller can forget to await (a forgotten
+ * await returns a Promise, and `if (promise)` is always true).
+ *
+ * The database wins where it has an answer. The environment is the fallback, so a deployment with
+ * no `HC_ROLE_ASSIGNMENTS` set grants exactly what the record says and nothing else.
+ *
+ * NEVER FATAL. If the database is unreachable this falls back rather than throwing, because a
+ * failed lookup must not become "everybody is signed out": it resolves to no role, which is
+ * `/not-authorized`, which says what is wrong. Refusing safely beats failing loudly on the one
+ * path that decides whether anybody can use the product at all.
+ */
+async function roleSourceFor(email: string | null | undefined): Promise<RoleSource> {
+  const env = roleSourceFromEnv();
+  if (!email || !process.env.DATABASE_URL) return env;
+  try {
+    const { Repository } = await import('./data/repository');
+    const { db } = await import('./db');
+    const person = await new Repository(db()).findByEmail(email);
+    if (!person) return env;
+    return inMemoryRoles({ [person.email]: { role: person.role, pillars: person.pillars } });
+  } catch {
+    return env;
+  }
+}
+
 /** Resolve the signed-in person. Returns the full three-way outcome, never a bare principal. */
 export async function currentResolution(): Promise<Resolution> {
   const session = await auth();
-  return resolvePrincipal(session?.user?.email, {
+  const email = session?.user?.email;
+  return resolvePrincipal(email, {
     adminEmails: parseEmailList(process.env.HC_ADMIN_EMAILS),
-    roles: roleSourceFromEnv(),
+    roles: await roleSourceFor(email),
     workspaceDomain: process.env.HC_WORKSPACE_DOMAIN,
   });
 }
