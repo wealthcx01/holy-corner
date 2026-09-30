@@ -241,3 +241,43 @@ describe('the activity feed is scoped too', () => {
     });
   });
 });
+
+describe('a production BUILD is not a production DEPLOYMENT', () => {
+  const goodSecret = 'Zk3n8QpL2vX9mR4tY7wB1cF6hJ0sA5dG';
+
+  it('does not demand a database when the end-to-end door is open', () => {
+    // HC-006 could not start a server at all: `next start` sets NODE_ENV=production for the UI
+    // gate, for a local preview, and for the real deployment alike, so keying the refusal on it
+    // blocked all three. The first person to preview a production build would have hit the same
+    // wall with no idea why.
+    expect(() =>
+      assertBootable({
+        NODE_ENV: 'production',
+        AUTH_SECRET: goodSecret,
+        E2E_TEST_LOGIN: '1',
+        E2E_TEST_LOGIN_SECRET: 'e2e-shared-secret',
+      }),
+    ).not.toThrow();
+  });
+
+  it('still demands one when only half the door is set', () => {
+    // A stray E2E_TEST_LOGIN=1 with no secret creates no door (HC-003), so it must not create an
+    // exemption either.
+    for (const half of [
+      { E2E_TEST_LOGIN: '1' },
+      { E2E_TEST_LOGIN_SECRET: 'a-secret' },
+      { E2E_TEST_LOGIN: '0', E2E_TEST_LOGIN_SECRET: 'a-secret' },
+      { E2E_TEST_LOGIN: '1', E2E_TEST_LOGIN_SECRET: '   ' },
+    ]) {
+      expect(() =>
+        assertBootable({ NODE_ENV: 'production', AUTH_SECRET: goodSecret, ...half }),
+      ).toThrow(BootRefusal);
+    }
+  });
+
+  it('still refuses a real deployment with no database', () => {
+    // The rule the whole check exists for, unchanged.
+    expect(() => assertBootable({ NODE_ENV: 'production', AUTH_SECRET: goodSecret }))
+      .toThrow(/DATABASE_URL/);
+  });
+});

@@ -68,7 +68,13 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
                   either wraps the header or pushes the sections off the end, and neither is worth
                   it to show somebody the account they are already using. */}
               <button className="btn btn-ghost" type="submit" title={principal?.email ?? undefined}>
-                {principal ? principal.role : 'no role'} · Sign out
+                {/* The role is useful and droppable; "Sign out" is neither. On a phone the label
+                    goes and the control stays, because somebody with no role has no sections and
+                    this is the only thing on their page. */}
+                <span className="topbar-account-role">
+                  {principal ? principal.role : 'no role'} ·{' '}
+                </span>
+                Sign out
               </button>
             </form>
           ) : null}

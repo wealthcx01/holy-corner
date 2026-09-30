@@ -22,11 +22,14 @@ export function NotYet({
   ticket,
   what,
   role,
+  href,
 }: {
   title: string;
   ticket: string;
   what: string;
   role: Role;
+  /** This section's own path, so the way back can tell whether it leads anywhere. */
+  href: string;
 }) {
   // The way back has to be somewhere this person can actually go. It read "Back to the group" for
   // everybody until a staff account was screenshotted: staff cannot open the group, so the link
@@ -38,6 +41,18 @@ export function NotYet({
   const label = navFor(role).find((e) => e.href === back)?.label ?? 'your work';
   const backLabel = label.charAt(0).toLowerCase() + label.slice(1);
 
+  // AND SOMETIMES THERE IS NO WAY BACK, because you are already there.
+  //
+  // `staff` land on /record and `finance` on /money, and both of those sections are unbuilt, so
+  // both were handed a link labelled "Back to the record" or "Back to money" that pointed at the
+  // page they were reading. Half the roles in the product got a control that did nothing.
+  //
+  // The fix above - send people to their own landing page - is what created this, and no test
+  // noticed: the link was present, it had an href, and the href resolved. It took the screenshot
+  // of /record as staff to see the words next to each other. Nothing to click is honest; a button
+  // that reloads the same screen is not.
+  const nowhereToGo = back === href;
+
   return (
     <div className="measure">
       <p className="eyebrow">Not built yet</p>
@@ -47,9 +62,11 @@ export function NotYet({
         This section arrives in <strong>{ticket}</strong>. The link is here now so the whole shape of
         the product is visible from the first screen, rather than appearing one item at a time.
       </div>
-      <p>
-        <Link href={back}>Back to {backLabel}</Link>
-      </p>
+      {nowhereToGo ? null : (
+        <p>
+          <Link href={back}>Back to {backLabel}</Link>
+        </p>
+      )}
     </div>
   );
 }
