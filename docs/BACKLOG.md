@@ -42,7 +42,7 @@ from John. HC-002 is next and in progress.
 | HC-018 | Consultant payables beside receivables: gross margin per deal, pay-when-paid closed | Todo |
 | HC-019 | Documents from data: an invoice PDF, an MSA and a schedule from templates | Todo |
 | HC-020 | Cost centres and a P&L per pillar: expenses, budgets, margin | Todo |
-| HC-042 | The approval gate: proposed, granted, executed, on a signed event log (built early) | Todo |
+| HC-042 | The approval gate: proposed, granted, executed, on a signed event log (built early) | Done |
 
 ## Phase 2 — The executive view
 

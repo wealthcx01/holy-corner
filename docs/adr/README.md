@@ -21,5 +21,5 @@ Format, copied from grassmarket ADR-0041:
 | ADR | Decision | Status | Ticket |
 |---|---|---|---|
 | ADR-0001 | How Holy Corner calls Claude: SDK, models, env names, provenance recorded on every output | to be written | HC-013 |
-| ADR-0002 | The approval event log: shape, signing, storage, projection | to be written | HC-042 |
+| [ADR-0002](ADR-0002-the-approval-event-log.md) | The approval event log: append-only in Postgres, signed, with the grant bound to a content hash | **Accepted** 2026-09-30 | HC-042 |
 | ADR-0003 | How Wise is read, and why it is never written | to be written | HC-015 (after SD3-0108) |
