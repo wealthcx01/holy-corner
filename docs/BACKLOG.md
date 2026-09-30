@@ -18,7 +18,7 @@ from John. HC-002 is next and in progress.
 | HC-003 | Sign-in: Google and the password door, roles, the admin allowlist, server-side scoping | Done |
 | HC-004 | The data layer: Postgres on Railway, migrations, one repository, PGLite for tests | Done |
 | HC-005 | bcap-contracts for the hub: new types, vendored schemas, generated TypeScript, a parity check | Done |
-| HC-006 | The UI gate: Playwright, the screenshot gallery, the design-conformance scorecard | Todo |
+| HC-006 | The UI gate: Playwright, the screenshot gallery, the design-conformance scorecard | In review |
 | HC-007 | Deploy: the Railway service, health, the domain, the OAuth client, the env table | Todo |
 | HC-008 | Seed and fixtures: the commercial record as data, and a demo mode | Todo |
 | HC-009 | copy-lint: plain English as a mechanism, not a hope | Todo |
@@ -74,6 +74,8 @@ from John. HC-002 is next and in progress.
 | HC-051 | The template library: every agreement we sign, versioned, with variables | Todo |
 | HC-052 | The public site's login router and the Holy Corner front door | Todo |
 | HC-053 | The Foundry landing page, hosted here | Todo |
+| HC-058 | Two of the five status tones are the same colour (found by the UI gate) | Todo |
+| HC-059 | The migrate script needs bun, which the deploy does not have (blocks HC-007) | Todo |
 
 ## Companion work in other repos
 

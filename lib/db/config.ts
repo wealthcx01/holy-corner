@@ -18,6 +18,9 @@ export interface BootEnv {
   readonly DATABASE_URL?: string;
   readonly AUTH_SECRET?: string;
   readonly NODE_ENV?: string;
+  /** The end-to-end sign-in door. Both set means this is a test server, never a deployment. */
+  readonly E2E_TEST_LOGIN?: string;
+  readonly E2E_TEST_LOGIN_SECRET?: string;
 }
 
 /** Secrets shorter than this are refused in production. */
@@ -39,13 +42,40 @@ export function looksLikePlaceholder(secret: string): boolean {
 }
 
 /**
+ * Is this a real deployment, or merely a production BUILD?
+ *
+ * HC-004 keyed the refusal on `NODE_ENV === 'production'` and that is not the same question.
+ * `next start` sets `NODE_ENV=production` for anything built for production, which includes the UI
+ * gate, a reviewer running `npm run build && npm start` to look at a screen, and any local preview.
+ * None of those is the live deployment, and none of them has a database.
+ *
+ * HC-006 found it by being unable to start a server at all. The first person to preview a
+ * production build locally would have found it the same way, and would have had no idea why.
+ *
+ * The signal that actually separates them: **the end-to-end sign-in door**. HC-003 built it to
+ * exist only when `E2E_TEST_LOGIN=1` AND `E2E_TEST_LOGIN_SECRET` is set, and documented in
+ * `.env.example` that a real deployment sets neither. If that door is open, this is a test server.
+ *
+ * It is worth being explicit about the coupling this creates, rather than leaving it implied: if
+ * somebody ever did set both of those on a real deployment, this check would stop demanding a
+ * database. That would be the smaller of their two problems by a wide margin, because the open door
+ * lets anybody holding the secret sign in as anybody at all. The check that matters there is
+ * HC-007's deployment configuration, not this one.
+ */
+function isRealDeployment(env: BootEnv): boolean {
+  if (env.NODE_ENV !== 'production') return false;
+  const e2eDoorIsOpen = env.E2E_TEST_LOGIN === '1' && Boolean(env.E2E_TEST_LOGIN_SECRET?.trim());
+  return !e2eDoorIsOpen;
+}
+
+/**
  * Check the environment, or throw with a message that says what to do.
  *
- * Only in production. Development runs against PGLite or a local Postgres and must not be made
- * tedious by rules that exist to protect a live deployment.
+ * Only on a real deployment. Development and the UI gate run without a database on purpose and must
+ * not be made impossible by rules that exist to protect the live service.
  */
 export function assertBootable(env: BootEnv): void {
-  if (env.NODE_ENV !== 'production') return;
+  if (!isRealDeployment(env)) return;
 
   const url = env.DATABASE_URL?.trim();
   if (!url) {

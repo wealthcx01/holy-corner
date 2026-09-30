@@ -1,9 +1,12 @@
 import { NotYet } from '@/components/NotYet';
 import { requireSection } from '@/lib/session';
 
+/** This section's path, named once so the gate and the way back cannot disagree. */
+const SECTION = '/money';
+
 export default async function Money() {
   // The gate. Same decision as the navigation, so the two cannot drift (lib/session.ts).
-  const principal = await requireSection('/money');
+  const principal = await requireSection(SECTION);
 
   return (
     <NotYet
@@ -12,6 +15,7 @@ export default async function Money() {
       what="What has been invoiced, what is owed to us and by when, what we owe, what has landed in
             the bank, and the margin on each deal once the consultant's share is taken off."
       role={principal.role}
+      href={SECTION}
     />
   );
 }

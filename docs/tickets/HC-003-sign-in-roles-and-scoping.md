@@ -63,11 +63,13 @@ needs (`admin`, `exec`, `finance`, `staff`).
       to Google.
 - [x] Unknown email and wrong password give a byte-identical message, checked by comparing the two
       rendered strings rather than by reading the code. The throttle is covered by the ported tests.
-- [ ] **A Playwright test per role.** *Not done, and it cannot be done in this ticket.* Playwright
-      arrives in HC-006, which depends on HC-003, so this criterion asks for a tool the dependency
-      order does not have yet. The cases it describes were all driven through a real browser and
-      are recorded below; HC-006 turns them into the committed spec. See "An ordering problem in
-      the ticket set" below.
+- [x] **A Playwright test per role.** *Closed by HC-006, not by this ticket.* Playwright arrives in
+      HC-006, which depends on HC-003, so this criterion asked for a tool the dependency order did
+      not have yet. The cases were driven through a real browser by hand at the time and recorded
+      below; HC-006 turned them into the committed spec — `e2e/shell.spec.ts`, the `EXPECTED` table,
+      two tests per role: where that role lands, which sections it is offered, and what the SERVER
+      answers when it types a URL it was not offered. See "An ordering problem in the ticket set"
+      below for why this is ticked from another branch.
 - [x] `/login`, `/not-authorized` and the four role variants screenshotted at 1440×1000 and
       393×851, heights recorded below, and looked at.
 
