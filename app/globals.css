@@ -1,0 +1,1682 @@
+/* ============================================================================================
+   Holy Corner — the Bruntsfield tokens.
+
+   THIS FILE IS COPIED, NOT WRITTEN. DO NOT INVENT A THEME HERE.
+
+   Two sources, both of which trace back to the Bruntsfield website's own `colors_and_type.css`:
+
+     - fountainbridge `app/globals.css`, taken verbatim. It carries the paper/ink palette, Bottle
+       Green as the only chromatic colour, Source Serif 4 / Inter / IBM Plex Mono, the five
+       `--tone-*` status colours, and the hairline system FB-124 established: `border-radius: 0`
+       everywhere, no drop shadows, elevation carried by 1px rules and sunken insets.
+     - grassmarket `frontend/app/globals.css`, for the handful of reusable classes fountainbridge
+       has never needed. They are at the END of this file, in their own marked section, so the
+       fountainbridge half stays a clean copy that can be diffed against its source.
+
+   The three studios have to look like one product, because to the people using them they are one
+   product. A colour invented here is a fork of the brand, and `scripts/design-lint.mjs` fails the
+   build for a raw hex outside this file for exactly that reason.
+
+   Changing a token is a change to Bruntsfield's design system. Do it at the source and copy it
+   down, never the other way round.
+   ============================================================================================ */
+
+/*
+ * Foundry Studio design tokens (FB-005). Pulled from grassmarket / the Bruntsfield brand — NOT
+ * invented (D6). Same paper/ink + bottle-green system, serif/sans/mono trio, hairline-rule
+ * aesthetic, so the studio reads as one brand with the Advisory Studio. Single source of truth.
+ */
+
+:root {
+  /* Paper / ink */
+  --color-paper: #f7f6f2;
+  --color-paper-raised: #fdfcfa;
+  --color-paper-sunken: #efede6;
+  --color-ink: #17191f;
+  --color-ink-soft: #3a3d45;
+  --color-ink-muted: #6e7079;
+  --color-ink-faint: #9a97a0;
+
+  /* Accent — Bottle Green (the only chromatic colour) */
+  --color-accent: #1a3b26;
+  --color-accent-hover: #112619;
+  --color-accent-contrast: #f7f6f2;
+  --color-accent-tint: #e4eae3;
+  --color-accent-tint-border: #c9d6cb;
+
+  /* Lines */
+  --color-border: #dddbd6;
+  --color-border-strong: #b9b6ae;
+
+  /* Status */
+  --color-ok: #1a3b26;
+  --color-warn: #8a5a00;
+  --color-warn-tint: #f6efe0;
+  --color-error: #8a2020;
+  --color-error-tint: #f4e9e6;
+  --color-info-tint: #e4eae3;
+
+  /* Type */
+  --font-serif: var(--font-source-serif), 'Source Serif Pro', Georgia, serif;
+  --font-sans: var(--font-inter), 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), 'IBM Plex Mono', ui-monospace, monospace;
+  --fs-display: clamp(56px, 7vw, 96px);
+  --fs-h1: clamp(36px, 4.2vw, 56px);
+  --fs-h2: clamp(26px, 2.6vw, 34px);
+  /* The design's own two sizes for the desk (FB-203). Neither existed on the scale: the page title
+     it draws is 30px, and the blocker sentence it draws is 19px, and `--fs-h1` (up to 56px) and
+     `--fs-h4` (18px) are the nearest, which is not near enough on the two lines a founder reads
+     first. Item 13 is a wider audit of the scale against the design; these two are what items 2 and
+     4 need. */
+  --fs-page-title: 30px;
+  --fs-lead: 19px;
+  /* FB-203, item 7: the design's section headings — "The office", "What the engine did" — are 24px
+     serif 400. Nothing in the scale was 24px; --fs-h3 is 22 and --fs-page-title is 30. Item 13 is
+     the audit that reconciles the whole scale with the design's. */
+  --fs-section: 24px;
+  --fs-h3: 22px;
+  --fs-h4: 18px;
+  --fs-subhead: 15px;
+  --fs-body: 16px;
+  --fs-body-sm: 14px;
+  --fs-meta-lg: 13px;
+  --fs-meta: 12px;
+  --fs-eyebrow: 11px;
+
+  /*
+   * Status tones (FB-057) — the studio's ONE status vocabulary. Every domain status (CI, ticket,
+   * approval, lane fault) maps to one of these five tones in lib/status.ts, so the same meaning is
+   * the same colour on every screen. Components reference --tone-*, never the raw --color-* below:
+   * that indirection is the whole point, and design-lint enforces it.
+   *
+   *   ok        it worked / healthy / done
+   *   working   under way right now
+   *   attention needs a human, or a next step the founder must take (never a crash)
+   *   blocked   it failed, or cannot proceed
+   *   idle      nothing is happening, or we do not know
+   */
+  --tone-ok: var(--color-ok);
+  --tone-working: var(--color-accent);
+  --tone-attention: var(--color-warn);
+  --tone-blocked: var(--color-error);
+  --tone-idle: var(--color-ink-muted);
+
+  /* Chrome */
+  --topbar-height: 3.75rem;
+  --content-max: 64rem;
+  /* grassmarket (HC-002): one height for every text input, select and button that sits in a form
+     row, so a row of mixed controls lines up. */
+  --field-control-height: 2.55rem;
+  --content-narrow: 46rem;
+  /* The reading measure, from the Bruntsfield design system (FB-134). Long-form prose gets this and
+     nothing else: 62 characters is where a line stops being comfortable to track back from. */
+  --measure: 62ch;
+  /* FB-124 — the hairline system. Square corners, no shadows, 1px rules as structure, so the studio
+   * reads as one brand with the main Bruntsfield site.
+   *
+   * There is no --radius-* and no --shadow-* here on purpose, and design-lint keeps it that way. The
+   * one exception the design allows is an input, where a hairline square edge reads as a disabled
+   * field rather than a typable one. */
+  --radius-input: 2px;
+  --ease: cubic-bezier(0.2, 0.6, 0.2, 1);
+  --dur: 140ms;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-serif);
+  /* FB-203, item 13: 400, not 500. The design sets Source Serif 4 at 400 for every heading and has
+     no bold serif anywhere — a serif carries its weight in its own shapes, and half a step extra on
+     a display face reads as a slightly wrong font rather than as emphasis. This is the global rule;
+     the section headings added in items 7 to 11 already set it on themselves. */
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.012em;
+  margin: 0 0 0.5em;
+}
+h1 { font-size: var(--fs-h1); }
+h2 { font-size: var(--fs-h2); }
+h3 { font-size: var(--fs-h3); }
+h4 { font-size: var(--fs-h4); }
+
+a { color: inherit; text-decoration: none; }
+
+* { box-sizing: border-box; }
+
+/* Written as insurance in FB-074, load-bearing since FB-104: the brief's sentences link down to the
+   activity strip on the same page, so without this the strip would arrive hidden under the sticky
+   bar and the founder would follow a link to what looks like the wrong place. */
+h1, h2, h3, [id] { scroll-margin-top: calc(var(--topbar-height) + 1rem); }
+
+/* A sentence that is also a way in (FB-104). It must not look like a button or change the tone
+   colour the line already carries — the brief is prose first — so the only signal is a quiet
+   underline that firms up under the cursor. */
+.quiet-link {
+  text-decoration: underline;
+  text-decoration-color: var(--color-border-strong);
+  text-underline-offset: 0.15em;
+  transition: text-decoration-color var(--dur) var(--ease);
+}
+.quiet-link:hover { text-decoration-color: currentColor; }
+
+/* Top bar */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  min-height: var(--topbar-height);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 1.5rem;
+  background: var(--color-paper);
+  border-bottom: 1px solid var(--color-border);
+}
+.wordmark { display: flex; flex-direction: column; line-height: 1; }
+/* FB-189: caps, as the design draws it in all three places — 24px on sign in, 19px in the top bar,
+   17px in the rail. The rail already hard-coded `BRUNTSFIELD`; the top bar and the sign-in page
+   rendered `Bruntsfield`, so the product carried two wordmarks and the one a founder met first was
+   the odd one out. */
+.wordmark-name {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  /* The one serif that keeps a heavier weight: it is a wordmark, not a heading, and the rail's own
+     BRUNTSFIELD is drawn the same way. */
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.wordmark-sub {
+  font-family: var(--font-sans);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+.topbar-spacer { margin-left: auto; }
+.topnav { display: flex; gap: 0.25rem; align-items: center; }
+
+/* FB-124 — the persistent rail.
+ *
+ * Here rather than inline on the component, because an inline style cannot be overridden: the first
+ * version set `display: flex` inline and the phone media query below could not undo it, so a 250px
+ * rail sat on a 393px screen with no way to scroll it out of the way. Anything responsive belongs in
+ * a stylesheet. */
+.rail {
+  width: 15.625rem;
+  flex: 0 0 15.625rem;
+  box-sizing: border-box;
+  border-right: 1px solid var(--color-border);
+  padding: 1.6rem 1.4rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+/* FB-124 — the rail IS the navigation, wherever there is one.
+ *
+ * The first version of this shipped the rail without taking the top bar away, so a venture screen
+ * carried two navigations, two wordmarks, two "Needs you" badges and two ways to sign out. It looked
+ * exactly as bad as that sounds, and no unit test could have noticed.
+ *
+ * Stated as a rule rather than a route list: a page with a rail does not also get a top bar. Routes
+ * with no rail yet — the ventures index, /attention, /lanes — keep theirs until FB-129 and FB-136
+ * replace them, and this needs no edit when they do.
+ *
+ * **Keyed on the CLASS, not the test id** (FB-158). These rules keyed on `[data-testid='rail']` for
+ * four tickets, which made a test id load-bearing layout: renaming the waiting shell's id to tell it
+ * apart from the real rail took it straight out of the phone media query, and a 250px rail appeared
+ * on a 393px screen again — the exact defect FB-124 shipped and the amendment to CLAUDE.md #2 was
+ * written about. A test id names a thing for a test. A class is what styling is allowed to depend
+ * on. */
+body:has(.rail) .topbar { display: none; }
+
+/* FB-135 — the sign-in screen owns the whole window.
+ *
+ * The design's first screen is a centred block on an empty page: wordmark, one sentence, the two
+ * doors, and the Edinburgh line at the foot. The top bar carries a wordmark of its own, so leaving
+ * it up would print the name twice on the one screen where the studio introduces itself.
+ *
+ * Keyed on the class, like `body:has(.rail)` — see the note there. A stylesheet must never key on a
+ * test id (`design-lint`'s `testid-selector` rule). */
+body:has(.signin) .topbar { display: none; }
+body:has(.signin) .main { max-width: none; margin: 0; padding: 0; }
+
+.signin {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+/* One column of a readable width, whatever is in it. */
+.signin-block { width: 100%; max-width: 22rem; }
+
+/* FB-189 — sign in, against the design's own figures.
+ *
+ * This is the screen a founder sees before they trust anything, and it was the one screen the
+ * FB-175 audit never compared. The words were right; everything around them was not.
+ *
+ * The design: a 24px serif caps wordmark over a hairline rule, a 32px heading under it, fields that
+ * are an underline rather than a box, and a modest bordered button that does not compete with
+ * "Continue with Google". */
+.signin .wordmark { align-items: center; margin-bottom: 2.25rem; }
+.signin .wordmark-name { font-size: 1.5rem; }
+/* The rule the design puts between the two halves of the wordmark, full width of the block. */
+.signin .wordmark-rule {
+  display: block;
+  width: 100%;
+  border-top: 1px solid var(--color-border-strong);
+  margin: 0.5rem 0;
+}
+
+/* The verb, not the page title. `--fs-h1` renders 56px here and made the screen shout "Sign in"
+   while whispering whose studio it is. */
+.signin h1 { font-size: var(--fs-h2); font-weight: 400; line-height: 1.15; }
+
+/* A modest control under the fields. Full width made it a second primary button, competing with
+   "Continue with Google" for the same decision.
+   `justify-self`, not just `width: auto`: the form is a grid, and a grid item stretches to its
+   column unless it is told not to — so the width alone did nothing. */
+.signin-submit {
+  justify-self: center;
+  width: auto;
+  margin-top: 0.5rem;
+  padding: 0.6rem 1.5rem;
+}
+
+/* The design separates the footer line rather than letting it float under the form. */
+.signin-foot {
+  width: 100%;
+  max-width: 22rem;
+  border-top: 1px solid var(--color-border);
+  margin-top: 2.25rem;
+  padding-top: 0.875rem;
+}
+/* FB-189: an underline, not a box, and centred — the design's own input treatment on this screen.
+   A boxed field is the studio's form style everywhere else; here the design draws a rule. */
+.signin-field {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.6rem 0;
+  font: inherit;
+  font-size: var(--fs-body-sm);
+  color: var(--color-ink);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--color-border-strong);
+  border-radius: 0;
+  text-align: center;
+}
+/* The focus state thickens the rule in the accent. `:focus-visible` keeps the outline for keyboard
+   users — a focus style that is only a colour change is one a keyboard user can lose track of. */
+.signin-field:focus { border-bottom: 2px solid var(--color-accent); }
+.signin-field:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 1px; }
+/* The line between the two doors. FB-189: plain centred text, which is what the design draws —
+   the flanking rules made a divider out of a label and put a third horizontal line on a screen that
+   has two. */
+.signin-or {
+  text-align: center;
+  color: var(--color-ink-muted);
+  font-size: var(--fs-meta-lg);
+}
+
+/* FB-138 — the pocket studio.
+ *
+ * The design's screen 11 is not a cut-down desk, it is the same desk in one column, in the order a
+ * founder needs it on a phone: what they are blocking, what their team is doing, the queue, and the
+ * prompt. At a desk the order is different because the eye scans a wide page differently.
+ *
+ * Done with `order` rather than a second composition, deliberately. A phone-only copy of these four
+ * sections would put two of every control in the document — which is exactly how the rail's waiting
+ * shell and the ledger's fallback table each shipped a duplicate test id (FB-158, FB-136). One
+ * markup, one set of controls, reordered.
+ *
+ * `order` only reaches DIRECT children of a flex container, which is why the four carry wrappers. */
+@media (max-width: 48rem) {
+  .desk { display: flex; flex-direction: column; }
+  /* Everything not named keeps its source order, after the four. */
+  .desk > * { order: 5; }
+  .desk > .pocket-0 { order: 0; }
+  .desk > .pocket-1 { order: 1; }
+  /* Between the banner and the office: what is stuck, which the banner counts but does not name. */
+  .desk > .pocket-1b { order: 1; }
+  .desk > .pocket-2 { order: 2; }
+  .desk > .pocket-3 { order: 3; }
+  .desk > .pocket-4 { order: 4; }
+
+  /* FB-160: what the pocket studio does NOT carry.
+   *
+   * The design's own words for this screen: *"The same events, one column: the blocker banner, the
+   * live office, the queue, the prompt."* Four things. Ours put the whole desk on the phone —
+   * 4,398px of it, most of it below the prompt bar.
+   *
+   * Stood down, not removed, and not duplicated: this is the same markup the desk renders, so there
+   * is never a second copy of a control in the document. `?full=1` brings it all back, and the link
+   * at the end of the pocket studio is how a founder gets there.
+   *
+   * What stays is the four, plus everything a founder can ACT on — the blocker banner, the queue
+   * with its decisions, the prompt, the wiring warning, and the strip of what could not be read. A
+   * lane's read failure reaches that strip too (`page.tsx` builds it from the lanes), so standing
+   * the surface cards down hides no failure. */
+  .desk:not(.desk-full) .not-in-pocket { display: none; }
+  .pocket-more { order: 6; }
+}
+
+/* The way to the whole desk, and back. Only ever on a phone: at a desk there is nothing to expand,
+   and a control that does nothing is worse than none (design contract, `dead-control`). */
+.pocket-more { display: none; }
+@media (max-width: 48rem) { .pocket-more { display: block; } }
+
+/* Main content column */
+.main {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 3rem 1.5rem 5rem;
+}
+
+/* The venture shell — a rail and a column, and a gutter between them (FB-203, item 1).
+ *
+ * What this replaces was a flex row inside `.main`, with `.main` carrying the only padding. Two
+ * things followed from that and both were visible at a glance once anyone measured:
+ *
+ *   - **No gutter.** The rail's right edge and the first character of the desk were both at x=286.
+ *     The copy touched the navigation column.
+ *   - **Nothing shared a right edge.** Sections measured from `.main`, whose box included the rail,
+ *     so their widths depended on what each one happened to set for itself. Measured at 1200px:
+ *     the banner ended at 1022 and everything else at 1164.
+ *
+ * A grid fixes both by construction rather than by arithmetic. The rail is a column; the pane is a
+ * column; each carries its own padding; and the design's 1,080px measure sits on the PANE, where it
+ * describes the thing it is named after. The previous version put that measure on the box holding
+ * both, which is how it once came out at 766px (FB-188).
+ *
+ * `.main` beside a rail therefore carries no padding and no measure at all: it is now only a
+ * wrapper, and the two columns inside it are what a reader sees. */
+.venture-shell {
+  display: grid;
+  /* `minmax(0, 1fr)`, never a bare `1fr`. A `1fr` track is `minmax(auto, 1fr)`, so its minimum is
+     the widest thing inside it and one wide diagram pushes the whole page sideways — the grid
+     version of the flex `min-width: 0` problem, and caught here by a handbook chapter that took the
+     phone sideways by 275px. */
+  grid-template-columns: 15.625rem minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.venture-pane {
+  /* Without this a grid item refuses to shrink below its content, and one wide table takes the
+     whole page sideways. */
+  min-width: 0;
+  max-width: 67.5rem;
+  padding: 2rem 2.25rem 4rem;
+}
+
+body:has(.rail) .main {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* On a phone the rail is not navigation, it is 250px of a 390px screen.
+ *
+ * Shipped that way and it was as bad as it sounds: 620px of content in a 390px viewport, horizontal
+ * scrolling, and — because the rail hides the top bar — no navigation at all. A founder on a phone
+ * had a studio they could not move around in.
+ *
+ * Until FB-138 builds the pocket studio properly, a phone keeps the navigation that already works.
+ * This is a holding position and says so; the real answer is one column, not a hidden column. */
+/* FB-131: the composer's panes — the conversation, the thing being made, and the box you type in.
+   Three children rather than two, placed explicitly, so a phone can order them thread → rail → input.
+   Nesting the input inside the thread column put "File this" below Send when it stacked: a founder
+   scrolled past the box they type in to find the button they came to press.
+   In the stylesheet, not inline, because a media query cannot override an inline style — which is
+   how FB-124 shipped a 250px rail on a 393px phone. */
+.composer-split {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 0 2.5rem;
+  align-items: start;
+}
+.composer-thread-pane { grid-column: 1; grid-row: 1; }
+.composer-input-pane  { grid-column: 1; grid-row: 2; }
+.composer-rail-pane   { grid-column: 2; grid-row: 1 / span 2; }
+
+@media (max-width: 60rem) {
+  .composer-split { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
+  .composer-thread-pane,
+  .composer-input-pane,
+  .composer-rail-pane { grid-column: 1; grid-row: auto; }
+  .composer-thread-pane { order: 1; }
+  .composer-rail-pane { order: 2; }
+  .composer-input-pane { order: 3; }
+}
+
+/* A rendered ticket, wherever it is read (FB-153).
+   `.ticket-body` was a class name with no rule behind it — used by the tickets screen, the work
+   view, the drawer and memory, and styled by none of them. So a ticket citing a long URL pushed the
+   page sideways on a phone: 471px of content in a 393px window, from one link a founder's own team
+   had written into a ticket. Nothing caught it because the e2e fixtures have no long links; it took
+   ARCA's real backlog.
+   `anywhere` rather than `break-word`: only the former breaks a long token when it is the sole thing
+   on the line, which is exactly the case here. */
+.ticket-body { overflow-wrap: anywhere; }
+.ticket-body pre { overflow-x: auto; }
+.ticket-body img { max-width: 100%; height: auto; }
+/* A wide table scrolls inside its own box rather than taking the page with it. */
+.ticket-body table { display: block; overflow-x: auto; max-width: 100%; }
+
+/* The handbook's prose, and the same four rules for the same reason (FB-188).
+   FB-153 found `.ticket-body` was a class name with no rule behind it, so a ticket citing a long URL
+   pushed the page sideways on a phone. It fixed that class. `.playbook-prose` — the handbook and the
+   playbook — was the identical case and was not looked at: no rule behind the name, and chapter one
+   carries an ASCII diagram in a `<pre>` that is 644px wide in a 393px window. The page scrolled
+   sideways, in production, on the screen a founder is asked to read first.
+   Found by FB-188's sweep of every screen, not by its change. The audit measured "a chapter" on a
+   short one and recorded that it matched. */
+.playbook-prose { overflow-wrap: anywhere; }
+.playbook-prose pre { overflow-x: auto; max-width: 100%; }
+.playbook-prose img { max-width: 100%; height: auto; }
+.playbook-prose table { display: block; overflow-x: auto; max-width: 100%; }
+
+/* FB-185: a ticket read inside a panel is body copy, not a page.
+   A ticket file's own `## Context` / `## Scope` / `## Acceptance criteria` were rendering at the
+   global heading sizes — the same scale as the `Tickets` title at the top of the screen — inside a
+   column beside the list. On ARCA's real backlog one open research ticket was most of a 2,967px
+   page on its own, and the design's ticket detail has no headings that size anywhere in it.
+   Scaled down rather than hidden: the founder still gets every word their team wrote, at the size
+   the surrounding sentence is set in. */
+.ticket-body h1,
+.ticket-body h2,
+.ticket-body h3,
+.ticket-body h4 {
+  font-size: var(--fs-body);
+  line-height: 1.3;
+  font-weight: 600;
+  margin: 1.1rem 0 0.35rem;
+}
+.ticket-body h1:first-child,
+.ticket-body h2:first-child { margin-top: 0; }
+.ticket-body p, .ticket-body ul, .ticket-body ol { margin: 0 0 0.6rem; }
+.ticket-body li { margin: 0 0 0.2rem; }
+
+/* The press that opens the rest of the ticket. Looks like the link it behaves as. */
+.ticket-body-more {
+  cursor: pointer;
+  font-size: var(--fs-body-sm);
+  color: var(--color-accent);
+  text-decoration: underline;
+  margin: 0.2rem 0 0.6rem;
+}
+.ticket-body details[open] > .ticket-body-more { margin-bottom: 0.8rem; }
+
+/* FB-129: the tickets screen — list beside detail, stacking on a narrow screen.
+   In the stylesheet rather than inline, because a media query cannot override an inline style:
+   FB-124 shipped a 250px rail on a 393px phone for exactly that reason and it took four
+   diagnostics to find. Anything responsive lives here. */
+.tickets-split {
+  display: grid;
+  grid-template-columns: minmax(14rem, 20rem) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+  margin-top: 1.25rem;
+}
+
+@media (max-width: 60rem) {
+  .tickets-split { grid-template-columns: minmax(0, 1fr); }
+
+  /* FB-185: one column at a time, which is the design's phone treatment.
+     Stacking showed both: the queue, and then the full text of whichever ticket the screen had
+     selected by default underneath it — 8,242px on ARCA's data, and 8,859px once a founder opened
+     one. So exactly one column is shown. No ticket open: the queue, which is what a founder came
+     for. A ticket open: the ticket, with `← All tickets` to get back.
+     Wide screens keep both columns — there the list is beside the ticket, not on top of it. */
+  .tickets-split.is-reading > .tickets-list { display: none; }
+  .tickets-split:not(.is-reading) > .tickets-detail { display: none; }
+  .back-to-list { display: inline-block; margin-bottom: 0.9rem; }
+}
+
+/* The way back only exists where the list is hidden. */
+.back-to-list { display: none; }
+
+@media (max-width: 60rem) {
+  /* The class, not the test id — see the note above `body:has(.rail) .topbar`. This catches the
+     rail AND the shell that stands in for it while its numbers load; both are 250px, and neither
+     belongs on a phone. */
+  .rail { display: none; }
+  body:has(.rail) .topbar { display: flex; }
+  /* A hidden grid item is not a grid item, so the pane would otherwise land in the rail's 250px
+     column and the phone would get a 250px-wide desk. The column has to go with the rail. */
+  .venture-shell { grid-template-columns: minmax(0, 1fr); }
+  .venture-pane {
+    /* No `margin: 0 auto` here, and the omission is the whole point.
+     *
+     * An auto margin on a GRID ITEM changes how it is sized: instead of stretching to its track it
+     * becomes fit-content, so it grows to whatever the widest thing inside it is. Carried over from
+     * the old rule — where it sat on a plain block and did the harmless thing — it made the pane
+     * 668px wide inside a 393px track, and a handbook chapter took the phone sideways by 275px.
+     *
+     * There is nothing to centre in any case: the measure below is 64rem and this query only runs
+     * under 60rem, so it never binds. It is kept to say what the column is for. */
+    max-width: var(--content-max);
+    padding: 3rem 1.5rem 5rem;
+  }
+}
+
+/* Eyebrow kicker */
+.eyebrow {
+  font-family: var(--font-sans);
+  font-size: var(--fs-eyebrow);
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+.eyebrow-id { color: var(--color-accent); }
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-sans);
+  font-size: var(--fs-body-sm);
+  font-weight: 500;
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-paper-raised);
+  color: var(--color-ink);
+  cursor: pointer;
+  transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.btn:hover { background: var(--color-paper-sunken); }
+.btn-primary {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-accent-contrast);
+}
+.btn-primary:hover { background: var(--color-accent-hover); }
+
+/* Nav pills */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-sans);
+  font-size: var(--fs-body-sm);
+  font-weight: 500;
+  padding: 0.4rem 0.8rem;
+  color: var(--color-ink-soft);
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.pill:hover { background: var(--color-paper-sunken); }
+.pill[data-active='true'] { background: var(--color-accent-tint); color: var(--color-accent); }
+
+/* Cards */
+/* A card is a hairline box. Elevation is the rule and the sunken inset, never a shadow — and hover
+ * shifts colour only. The design is explicit: "No scale, no shadow, no parallax." A card that lifts
+ * under the cursor is the one thing on a page that behaves like a different product. */
+.card {
+  background: var(--color-paper-raised);
+  border: 1px solid var(--color-border);
+  padding: 1.25rem 1.4rem;
+}
+.card-link {
+  display: block;
+  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.card-link:hover {
+  border-color: var(--color-border-strong);
+  background: var(--color-paper-sunken);
+}
+
+/* Tag / chip */
+.tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0.5rem;
+  background: var(--color-paper-sunken);
+  color: var(--color-ink-muted);
+}
+.tag-accent { background: var(--color-accent-tint); color: var(--color-accent); }
+
+/* Records table (FB-133)
+ *
+ * The studio's one table style: hairlines, no zebra striping, no vertical rules — the same paper
+ * grammar as the cards, so a table does not read as a different product on the same page.
+ *
+ * `.table-scroll` is not decoration. FB-153 shipped a 393px screen that a single long URL pushed to
+ * 471px, and a four-column table is the same defect waiting to happen: the wrapper takes the
+ * overflow so the PAGE never scrolls sideways. `word-break` on the cells means it usually does not
+ * come to that. */
+/* `position: relative` is load-bearing, not tidiness (FB-136).
+ *
+ * `.sr-only` is `position: absolute`. With no positioned ancestor its containing block is the
+ * document, so it is laid out at its static position — which, in a table scrolled 120px to the
+ * right, is 120px past the window — and it ESCAPES the scroll container, adding that width to the
+ * document. A seven-column ledger on a 393px phone scrolled the whole page sideways by 92px, and
+ * the scroll container was working perfectly the entire time.
+ *
+ * A scroll container should be the containing block for what it contains. */
+.table-scroll { position: relative; max-width: 100%; overflow-x: auto; }
+.records {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-body-sm);
+  text-align: left;
+}
+.records th {
+  font-family: var(--font-mono);
+  font-size: var(--fs-eyebrow);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-ink-muted);
+  font-weight: 400;
+  padding: 0 0.9rem 0.45rem 0;
+  border-bottom: 1px solid var(--color-border-strong);
+  white-space: nowrap;
+}
+.records td {
+  padding: 0.65rem 0.9rem 0.65rem 0;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+.records th:last-child, .records td:last-child { padding-right: 0; }
+
+/* A button that reads as a link. The row's document opens a reader rather than navigating, so it
+ * must be a <button> for the keyboard and a link to the eye. */
+.link-button {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  cursor: pointer;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.link-button:hover { color: var(--color-accent-hover); }
+
+.grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); }
+/* A deliberate three-across (FB-134), not an auto-fill: the handbook is nine chapters and the design
+   is a 3×3. Auto-fill would give four columns in a wide window and break the shape into 4/4/1. */
+/* FB-190 — the handbook's chapter index, as the design draws it.
+ *
+ * One block with hairline rules between the cells, not nine separately bordered cards with a gap
+ * between them. The design reads it as a single table; ours read as nine objects.
+ *
+ * The rules ARE the gap: a 1px grid gap over a border-coloured background paints exactly one
+ * hairline between neighbours and none anywhere else, so the internal lines cannot double up and
+ * there is nothing to keep in step when the column count changes. */
+.handbook-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--color-border);
+  border: 1px solid var(--color-border);
+}
+.handbook-grid > .card-link {
+  border: 0;
+  background: var(--color-paper-raised);
+  padding: 1.1rem 1.25rem;
+}
+@media (max-width: 60rem) { .handbook-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 40rem) { .handbook-grid { grid-template-columns: minmax(0, 1fr); } }
+
+.grid-3 { display: grid; gap: 1rem; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 60rem) { .grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 40rem) { .grid-3 { grid-template-columns: minmax(0, 1fr); } }
+.stack { display: flex; flex-direction: column; gap: 0.35rem; }
+.hr { height: 1px; background: var(--color-border); border: 0; margin: 2rem 0; }
+.muted { color: var(--color-ink-muted); }
+
+/* Visually hidden, still announced. State carried only by colour or a glyph is state a
+   screen-reader user does not get — every such marker needs a text twin. */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+.mono { font-family: var(--font-mono); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+
+/* Mobile pass (FB-009): usable at 390×844. Nav drops to its own full-width row with thumb-sized
+   targets; the page eyebrow hides; content padding tightens; boards/drawers are already single-column. */
+@media (max-width: 640px) {
+  .topbar {
+    flex-wrap: wrap;
+    padding: 0.5rem 0.9rem;
+    row-gap: 0.5rem;
+    height: auto;
+  }
+  .topbar-eyebrow { display: none !important; }
+  .signout-form { margin-left: auto; }
+  .topnav {
+    order: 5;
+    flex-basis: 100%;
+    margin-left: 0 !important;
+    gap: 0.4rem;
+    justify-content: center;
+    flex-wrap: wrap; /* wrap to a second row rather than overflow when labels are long (FB-024) */
+  }
+  .topnav .pill {
+    flex: 1 1 auto;
+    min-width: 0; /* allow a long single-word label (e.g. "Workstreams") to shrink, never overflow */
+    justify-content: center;
+    min-height: 44px; /* thumb-reachable tap target */
+  }
+  .btn { min-height: 44px; }
+  .main { padding: 1.5rem 1rem 3rem; }
+  h1 { font-size: 30px; }
+  /* Ticket drawer is already min(40rem, 100%) → full-width on phone. */
+}
+
+/* A surface's name, which is also the door to its queue (FB-109). It has to look like the heading it
+   replaced — the card is not a button, the name is — so the only affordances are the pointer, an
+   underline on hover, and a visible pressed state. */
+.surface-name {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  border-bottom: 1px solid transparent;
+}
+.surface-name:hover { border-bottom-color: var(--color-border-strong); }
+.surface-name[aria-pressed='true'] { border-bottom-color: var(--color-accent); color: var(--color-accent); }
+
+/* FB-180: a row of the record — when, what, and which surface it belongs to.
+   In the stylesheet and not inline, for the reason this file already gives twice: a media query
+   cannot override an inline style, and this layout has to change shape on a phone. Inline flex here
+   put three columns in a 393px window and took the page to 10,233px. */
+.activity-row {
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: baseline;
+  padding: 0.55rem 0;
+  border-top: 1px solid var(--color-border);
+}
+.activity-when { font-size: var(--fs-meta); }
+.activity-said { min-width: 0; }
+.activity-meta { font-size: var(--fs-meta-lg); text-align: right; }
+
+/* A phone has room for one column, so the row becomes two lines: the sentence, then when and where
+   under it. Three columns in 393px is what made this screen taller than the one it replaced. */
+@media (max-width: 48rem) {
+  .activity-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.15rem;
+  }
+  .activity-when { order: 2; }
+  .activity-said { order: 1; }
+  .activity-meta { order: 3; text-align: left; }
+}
+
+/* A row of the queue: what it is, and how long it has waited (FB-128, restructured by FB-160).
+   In the stylesheet and not inline, for the reason this file gives three times already: a media
+   query cannot override an inline style, and this row has to change shape on a phone.
+   Inline flex put the title and "waiting 34 days Decide →" side by side in a 345px column, so every
+   title wrapped to three lines and nine rows came to 1,129px. */
+/* ---- The company, by surface (FB-203, item 11) ------------------------------------------------
+
+   Three columns divided by rules, not three bordered cards. The cards carried a border, a
+   background, 16px of padding and a serif title each to hold what is now a label, a sentence and
+   two links — and they were the most button-shaped objects on the page while doing the least.
+
+   `1fr 1fr 1fr` with no gap, the rule doing the separating: the design's own shape, and it stops
+   three surfaces of different lengths reading as three unrelated objects. */
+.surfaces {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+}
+.surface-col {
+  border-left: 1px solid var(--color-border);
+  padding: 0.25rem 1.375rem 0.5rem;
+  min-width: 0;
+}
+.surface-col:first-child { border-left: 0; padding-left: 0; }
+.surface-label {
+  font-family: var(--font-sans);
+  font-size: var(--fs-eyebrow);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+  margin: 0 0 0.4rem;
+}
+/* The name is still the control that filters the queues (FB-109), it just looks like the label the
+   design draws rather than like a serif heading with a pill beside it. */
+.surface-label button {
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+.surface-label button[aria-pressed='true'] { color: var(--color-accent); }
+.surface-line {
+  font-size: var(--fs-meta-lg);
+  line-height: 1.6;
+  color: var(--color-ink-soft);
+  margin: 0 0 0.5rem;
+}
+.surface-links { font-size: var(--fs-meta-lg); margin: 0; }
+.surface-links a { display: block; margin-top: 0.2rem; }
+
+/* On a phone three columns of a sentence each is three columns of one word each. */
+@media (max-width: 48rem) {
+  .surfaces { grid-template-columns: minmax(0, 1fr); }
+  .surface-col {
+    border-left: 0;
+    border-top: 1px solid var(--color-border);
+    padding: 0.75rem 0 0.5rem;
+  }
+  .surface-col:first-child { border-top: 0; padding-top: 0; }
+}
+
+/* ---- The state mark (FB-210) ------------------------------------------------------------------
+
+   One square, in the tone's colour, wherever the studio marks a state. It replaces `⚠` and `●`,
+   which survived on nine screens after FB-203 turned the desk's marks into squares.
+
+   An emoji is a different typeface at a size nobody chose. It renders differently on every platform,
+   it does not take the tone colour — a `⚠` beside amber text is whatever amber the vendor picked —
+   and beside a serif sentence it reads as something pasted in.
+
+   `aria-hidden` always, with the word beside it. A state told only in colour is a state some readers
+   never get, and that rule is older than this ticket. */
+.mark {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-right: 0.5rem;
+  vertical-align: baseline;
+  background: currentColor;
+}
+/* Where the mark carries the tone and the text does not, the colour is set on the mark itself. */
+.mark-ok { background: var(--tone-ok); }
+.mark-working { background: var(--tone-working); }
+.mark-attention { background: var(--tone-attention); }
+.mark-blocked { background: var(--tone-blocked); }
+.mark-idle { background: var(--tone-idle); }
+
+/* ---- The tickets screen (FB-208) --------------------------------------------------------------
+
+   Tabs on a hairline, not four buttons. The filter row held `.btn` and `.btn-primary`, which made
+   the four most button-shaped objects on the screen the ones that only narrow a list — beside a
+   detail pane whose buttons merge work into a founder's product. */
+.tabs {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  align-items: baseline;
+  margin: 0.75rem 0 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+.tab {
+  font-family: var(--font-sans);
+  font-size: var(--fs-meta-lg);
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: 0 0 0.5rem;
+  margin-bottom: -1px;
+  color: var(--color-ink-muted);
+  cursor: pointer;
+}
+.tab[aria-selected='true'] { color: var(--color-ink); border-bottom-color: var(--color-accent); }
+.tab-count { font-family: var(--font-mono); font-size: var(--fs-meta); color: var(--color-ink-muted); }
+
+/* The row: title, then reference and surface beneath, with the wait pushed right in amber. The meta
+   line used to concatenate id, status, progress, waiting and a count — one line that wrapped to
+   three on ARCA, and never named the surface. */
+.ticket-row {
+  display: flex;
+  gap: 1rem;
+  align-items: baseline;
+  width: 100%;
+  text-align: left;
+  padding: 0.8125rem 0.5rem;
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.ticket-row[aria-current='true'] { background: var(--color-paper-sunken); }
+@media (hover: hover) { .ticket-row:hover { background: var(--color-paper-sunken); } }
+.ticket-row-body { flex: 1 1 auto; min-width: 0; }
+.ticket-row-title { display: block; font-size: var(--fs-body-sm); font-weight: 500; }
+.ticket-row-meta { display: block; font-size: var(--fs-meta); color: var(--color-ink-muted); }
+.ticket-row-when {
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-size: var(--fs-meta-lg);
+  font-weight: 600;
+  color: var(--color-warn);
+  white-space: nowrap;
+}
+@media (max-width: 48rem) {
+  .ticket-row { flex-wrap: wrap; }
+  .ticket-row-when { flex: 1 1 100%; margin-left: 0; }
+}
+
+/* ---- Waiting on you (FB-203, item 10) --------------------------------------------------------
+
+   The reference gets a column of its own, so titles start on one edge instead of wherever the
+   previous ticket id happened to end. */
+.queue-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.875rem;
+  flex-wrap: wrap;
+  margin: 0 0 0.5rem;
+}
+.queue-head h2 {
+  font-family: var(--font-serif);
+  font-size: var(--fs-section);
+  font-weight: 400;
+  margin: 0;
+}
+.queue-all { font-size: var(--fs-meta-lg); }
+
+.waiting-row {
+  display: flex;
+  gap: 1rem;
+  align-items: baseline;
+  padding: 0.8125rem 0;
+  border-bottom: 1px solid var(--color-border);
+  /* The whole row, not a two-word link at the end of it. It was a sentence with "Decide →" on the
+     right, so most of the widest control on the queue did nothing when pressed — and this is where
+     the amber banner sends a founder. */
+  text-decoration: none;
+  color: inherit;
+}
+@media (hover: hover) { .waiting-row:hover { background: var(--color-paper-sunken); } }
+.waiting-ref {
+  flex: 0 0 4.75rem;
+  font-size: var(--fs-meta-lg);
+  color: var(--color-ink-soft);
+}
+.waiting-body { flex: 1 1 auto; min-width: 0; }
+.waiting-title { font-size: var(--fs-body-sm); font-weight: 500; }
+.waiting-meta { display: block; font-size: var(--fs-meta); color: var(--color-ink-muted); }
+.waiting-alarm {
+  display: block;
+  font-size: var(--fs-meta-lg);
+  font-weight: 600;
+  color: var(--tone-blocked);
+}
+/* The arrow rides on the wait, because how long it has waited is the reason to press it. */
+.waiting-when {
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-size: var(--fs-meta-lg);
+  font-weight: 600;
+  color: var(--color-warn);
+  white-space: nowrap;
+}
+
+/* On a phone the row is two lines, which is the design's own shape: the reference and title, the
+   surface under them, and the wait on its own line. Nothing is dropped; it stops competing for
+   width with itself. */
+@media (max-width: 48rem) {
+  .waiting-row { flex-wrap: wrap; }
+  /* Its own line, always. Left to size itself, a long reference like `changed-proposal` took the
+     whole width and pushed the title down while a short one like `ARCA-1` sat beside it — so the
+     same list read as two different layouts depending on how the ticket happened to be named. */
+  .waiting-ref { flex: 1 1 100%; }
+  .waiting-when { flex: 1 1 100%; margin-left: 0; }
+}
+
+/* FB-192 — the venture office on the desk.
+ *
+ * The frame is taller than the space it is shown in, and the window clips the difference. See the
+ * note in `components/OfficeEmbed.tsx`: pixel-agents draws its room low in whatever height it is
+ * given, so a frame short enough to be polite showed the ceiling and a frame tall enough to show
+ * the room was a third empty. This shows the room, in the height of the shorter one.
+ *
+ * The offset is tied to the frame's height, not to the window's — move one and move both. */
+/* ---- What the engine did (FB-203, item 9) ----------------------------------------------------
+
+   Its own section under a rule, because it answers a different question from the ledger above it:
+   the ledger says what each surface is doing now, this says what the engine has done. Production
+   collapsed both into one list of cards where neither was legible. */
+.engine-section {
+  border-top: 1px solid var(--color-border-strong);
+  margin-top: 2.25rem;
+  padding-top: 1.25rem;
+}
+.engine-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.875rem;
+  flex-wrap: wrap;
+  margin: 0 0 0.75rem;
+}
+.engine-head h2 {
+  font-family: var(--font-serif);
+  font-size: var(--fs-section);
+  font-weight: 400;
+  margin: 0;
+}
+/* The promise, said beside the heading rather than in a paragraph under it. It is the reason a
+   founder can trust a short list: what is not here is older, not hidden. */
+.engine-sub { font-size: var(--fs-meta-lg); color: var(--color-ink-muted); }
+
+.engine-state {
+  display: flex;
+  align-items: baseline;
+  gap: 0.625rem;
+  font-size: var(--fs-body-sm);
+  margin: 0 0 0.875rem;
+}
+.engine-dot {
+  flex: 0 0 auto;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: var(--tone-working);
+}
+.engine-state-blocked { color: var(--tone-blocked); font-weight: 600; }
+.engine-state-blocked .engine-dot { background: var(--tone-blocked); }
+.engine-state-idle { color: var(--color-ink-muted); }
+.engine-state-idle .engine-dot { background: var(--tone-idle); }
+
+.engine-runs { list-style: none; padding: 0; margin: 0; }
+/* Rows, not cards. Each run was a bordered box with its own padding to carry one sentence, which is
+   how four runs came to cost more height than the room above them. */
+.engine-run {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.625rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.engine-run-when {
+  /* 5.75rem, not the design's 76px: "48 days ago" wrapped onto two lines at 76px and left every row
+     with a ragged two-line stub in its first column. The design's runs were hours old. */
+  flex: 0 0 5.75rem;
+  font-size: var(--fs-meta);
+  color: var(--color-ink-muted);
+}
+/* The outcome, as a square. It is `aria-hidden` and every row carries the same fact in words for a
+   screen reader, because a state told only in colour is a state some readers never get. */
+.engine-run-mark {
+  flex: 0 0 auto;
+  width: 0.5rem;
+  height: 0.5rem;
+  /* On the first line's baseline, not the middle of the row. Centred, it drifted downward as a
+     sentence wrapped and ended up beside the second line of a run it was marking. */
+  align-self: baseline;
+}
+.engine-run-mark.tone-ok { background: var(--tone-ok); }
+.engine-run-mark.tone-working { background: var(--tone-working); }
+.engine-run-mark.tone-attention { background: var(--tone-attention); }
+.engine-run-mark.tone-blocked { background: var(--tone-blocked); }
+.engine-run-mark.tone-idle { background: var(--tone-idle); }
+.engine-run-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: var(--fs-body-sm);
+  line-height: 1.6;
+}
+.engine-run-repeats { color: var(--color-ink-muted); }
+.engine-empty p { font-size: var(--fs-body-sm); margin: 0 0 0.4rem; }
+.engine-foot { font-size: var(--fs-meta); margin: 0.75rem 0 0; }
+
+/* On a phone the time drops above the sentence rather than stealing 76px of a 345px column. */
+@media (max-width: 30rem) {
+  .engine-run { flex-wrap: wrap; }
+  .engine-run-body { flex: 1 1 100%; }
+}
+
+/* ---- The office and its ledger, side by side (FB-203, item 7) --------------------------------
+
+   The pairing is the point: *the office is the feeling; this ledger is the record.* Production ran
+   them one under the other, so a founder read the room, scrolled, and read the same three surfaces
+   again with no sense that the second was an account of the first.
+
+   `flex-wrap` rather than a media query, because what decides this is whether the ledger has room
+   to be read, not what kind of device is asking. Below roughly 1,000px of column the ledger drops
+   under the room and gets the full width, which is what it needs anyway. */
+.office-section { margin: 1.5rem 0 1.75rem; }
+.office-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.875rem;
+  flex-wrap: wrap;
+  margin: 0 0 0.625rem;
+}
+.office-head h2 {
+  font-family: var(--font-serif);
+  font-size: var(--fs-section);
+  font-weight: 400;
+  margin: 0;
+}
+/* "Live from your venture's own machine", with a square that means it. The square is only drawn
+   when the room really is live — a permanent green dot beside the word "live" is a decoration, and
+   this one has to be able to be wrong for it to be worth anything. */
+.office-live {
+  display: inline-flex;
+  margin: 0 0 0.4rem;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-sans);
+  font-size: var(--fs-eyebrow);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+.office-live-dot {
+  width: 0.4375rem;
+  height: 0.4375rem;
+  background: var(--color-accent);
+}
+.office-pair {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2.25rem;
+  align-items: flex-start;
+}
+.office-pair-view { flex: 0 1 40rem; min-width: 22.5rem; }
+.office-pair-ledger { flex: 1 1 20rem; min-width: 17.5rem; }
+
+/* ---- The ledger (FB-203, item 8) -------------------------------------------------------------
+
+   Two columns, hairlines, no cards. The card version spent a border, a background and a padded box
+   on each surface to carry one short sentence. */
+.ledger { width: 100%; }
+.ledger-head,
+.ledger-row {
+  display: grid;
+  grid-template-columns: 6.875rem minmax(0, 1fr);
+  gap: 0 1.125rem;
+  align-items: baseline;
+}
+.ledger-head {
+  font-family: var(--font-sans);
+  font-size: var(--fs-eyebrow);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border-strong);
+}
+/* A real table under a drawn head. The head above is `aria-hidden` and this one is `sr-only`: a
+   grid of divs reads to a screen reader as an undifferentiated run of text, and this is the half of
+   the pairing that a screen-reader user gets instead of the picture. */
+.ledger-table { width: 100%; border-collapse: collapse; }
+.ledger-row { padding: 0.8125rem 0; border-bottom: 1px solid var(--color-border); }
+.ledger-name {
+  font-family: var(--font-sans);
+  font-size: var(--fs-body-sm);
+  font-weight: 600;
+  text-align: left;
+}
+.ledger-doing {
+  font-family: var(--font-sans);
+  font-size: var(--fs-body-sm);
+  line-height: 1.6;
+  color: var(--color-ink-soft);
+}
+.ledger-since { color: var(--color-ink-muted); }
+.ledger-row-waiting .ledger-name,
+.ledger-row-waiting .ledger-doing,
+.ledger-row-waiting .ledger-doing .ledger-link { color: var(--color-warn); }
+.ledger-link { color: inherit; text-decoration: none; }
+.ledger-link:hover { text-decoration: underline; }
+
+.office-embed { margin-bottom: 1.5rem; }
+
+.office-embed-window {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  max-width: var(--content-narrow);
+  height: 26rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-paper-sunken);
+}
+
+.office-embed-frame {
+  display: block;
+  position: absolute;
+  top: -17rem;
+  left: 0;
+  width: 100%;
+  height: 44rem;
+  border: 0;
+}
+
+.office-embed-note {
+  font-size: var(--fs-meta-lg);
+  margin: 0.4rem 0 0;
+  max-width: var(--content-narrow);
+}
+
+/* The desk's top half (FB-203, items 2, 4 and 6).
+ *
+ * The design's figures, and the three faults they replace: a ~60px venture name where the design has
+ * a 30px "The desk"; a blocker banner narrower than the page with its action buried inside the
+ * sentence; and an input and a Send button as two separate boxes with a gap down the middle. */
+
+/* Item 2 — the title and the meta on one baseline. The venture's name lives in the eyebrow and the
+   rail; repeating it at 60px pushed the sentence a founder actually reads below the fold. */
+.desk-head {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin: 0 0 0.15rem;
+}
+
+.desk-head h1 {
+  font-size: var(--fs-page-title);
+  font-weight: 400;
+  margin: 0;
+}
+
+/* Item 4 — one banner, one click target, full width.
+ *
+ * `align-items: baseline` so the square marker sits on the text's baseline rather than centred
+ * against a line box that changes height when the sentence wraps. */
+.blocker {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  border: 1px solid var(--color-warn);
+  background: var(--color-paper-sunken);
+  padding: 0.875rem 1.25rem;
+  margin: 0 0 1.25rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Guarded on a real pointer. On a touch screen there is no un-hover, so a tapped banner keeps the
+   tint after the founder has come back from the queue, and reads as still selected. */
+@media (hover: hover) { .blocker:hover { background: var(--color-accent-tint); } }
+
+/* Nothing is waiting: the same box, in the quiet border, so the page does not change shape when a
+   founder clears their queue. The design draws this state; we did not have it. */
+.blocker-clear { border-color: var(--color-border); }
+
+/* A square, not an emoji. An emoji is a different typeface at a size the design did not choose, and
+   it reads as a warning icon on a line that is not a warning. */
+.blocker-marker {
+  flex: 0 0 auto;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: var(--color-warn);
+}
+
+.blocker-clear .blocker-marker { background: var(--color-accent); }
+
+.blocker-line {
+  flex: 1 1 auto;
+  font-family: var(--font-serif);
+  font-size: var(--fs-lead);
+  line-height: 1.45;
+  color: var(--color-warn);
+}
+
+.blocker-clear .blocker-line { color: var(--color-ink-soft); }
+
+/* What is stuck, in the banner's own shape (FB-203, item 5).
+
+   Item 5 says delete the "Where things stand" box, and it is right that three of its four lines
+   repeated the summary sentence and the banner. The fourth did not: it names the tickets that are
+   stuck and need a human, and that fact has no other home on the desk or on the phone. Deleting the
+   box without it would have been the studio going quiet about work it cannot finish (CLAUDE.md
+   #10). So the line moved into the banner it always belonged in, and the box went.
+
+   No modifier, and that is the design's instruction rather than an omission: *"The design has no
+   red at all. Needs-you is amber; engine faults are the same amber."* The first version of this
+   drew the row in `--tone-blocked`, which reproduced the exact complaint item 5 makes about the box
+   it replaced — that its red was the loudest thing on the page. The two rows differ in what they
+   say and where they go ("Decide now →" to the queue, "Look →" to what happened), not in colour. */
+
+/* Pushed right, and on its own — the action is not a phrase inside the sentence. */
+.blocker-decide {
+  margin-left: auto;
+  flex: 0 0 auto;
+  font-size: var(--fs-meta-lg);
+  font-weight: 600;
+  color: var(--color-accent);
+  white-space: nowrap;
+}
+
+/* On a phone the action drops under the sentence, and only the action.
+
+   It did not, and the picture was the reason this rule exists: "Decide now →" held its place on the
+   right, the sentence was left a column about fifteen characters wide, and one banner ran twelve
+   lines down a 393px screen. Every test passed — the banner was present, correct, and linked. Only
+   looking at it found that.
+
+   `flex-basis: 0` on the sentence is what keeps the marker beside it. With `auto` the basis is the
+   sentence's own max-content width, which on a wrapping row is far wider than the phone, so the
+   sentence took a line of its own and left the square floating above a paragraph like a decoration
+   rather than sitting against the text. */
+@media (max-width: 30rem) {
+  .blocker { flex-wrap: wrap; }
+  .blocker-line { flex: 1 1 0; min-width: 0; }
+  .blocker-decide { flex: 1 1 100%; margin-left: 1.5rem; }
+}
+
+/* Item 6 — one container, with the Send inside it.
+ *
+ * It was an input and a button side by side with a gap between them, which reads as two controls
+ * where the design draws one. */
+.promptbar {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-paper-raised);
+  padding: 0.375rem 0.5rem 0.375rem 1.125rem;
+  margin: 0 0 1.75rem;
+}
+
+.promptbar-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  background: none;
+  padding: 0.5rem 0;
+  font-family: inherit;
+  font-size: var(--fs-body-sm);
+  color: var(--color-ink);
+}
+
+.promptbar-input:focus { outline: none; }
+/* The focus ring moves to the container, because the container is what a reader sees as the control. */
+.promptbar:focus-within { border-color: var(--color-accent); }
+
+/* Bordered pills, not underlined links. An underline says "this navigates"; a chip fills the box
+   above it and goes nowhere. */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: -1rem 0 1.75rem;
+  font-size: var(--fs-meta);
+  color: var(--color-ink-muted);
+}
+
+.chip {
+  border: 1px solid var(--color-border);
+  background: none;
+  padding: 0.3125rem 0.75rem;
+  font: inherit;
+  color: var(--color-ink-soft);
+  cursor: pointer;
+}
+
+.chip:hover { border-color: var(--color-border-strong); }
+
+
+/* ============================================================================================
+   FROM GRASSMARKET (HC-002)
+
+   Reusable classes the Advisory Studio has and the Foundry Studio has never needed. Copied from
+   grassmarket `frontend/app/globals.css` so the hub does not reinvent them, and kept here at the
+   end rather than merged in above, so the fountainbridge half stays a byte-for-byte copy of its
+   source and a future drift check can diff the two.
+
+   ONE DELIBERATE CHANGE. Grassmarket's `.callout` opens with `border-radius: var(--radius)`. That
+   token does not exist here and must not be added: fountainbridge retired `--radius-*` in FB-124,
+   when it adopted the hairline system, and every corner in this design is square. A rounded callout
+   would be the one rounded thing on every screen it appears on. The line is dropped rather than
+   ported, and this paragraph is why.
+   ============================================================================================ */
+
+/* ---------- Callouts (info / warn / error messages) ---------- */
+.callout {
+  padding: 0.75rem 0.9rem;
+  font-size: var(--fs-body-sm);
+  line-height: 1.5;
+  border: 1px solid transparent;
+}
+
+.callout-info {
+  background: var(--color-info-tint);
+  border-color: var(--color-accent-tint-border);
+  color: var(--color-ink);
+}
+
+.callout-warn {
+  background: var(--color-warn-tint);
+  border-color: color-mix(in srgb, var(--color-warn) 30%, transparent);
+  color: var(--color-warn);
+}
+
+.callout-error {
+  background: var(--color-error-tint);
+  border-color: color-mix(in srgb, var(--color-error) 30%, transparent);
+  color: var(--color-error);
+}
+
+/* ---------- Stat tile ---------- */
+/* Tabular numerals are not decoration here. This is a product about money, and a column of figures
+   whose digits are different widths cannot be scanned down. */
+.stat-value {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-h3);
+  line-height: 1.1;
+  color: var(--color-ink);
+}
+
+.stat-label {
+  font-size: var(--fs-meta);
+  color: var(--color-ink-muted);
+  margin-top: 0.15rem;
+}
+
+/* ---------- Reading width ---------- */
+.measure {
+  max-width: var(--content-narrow);
+}
+
+/* ---------- Button variants (the base `.btn` is fountainbridge's, above) ---------- */
+.btn-secondary {
+  background: var(--color-paper-raised);
+  color: var(--color-ink);
+  border-color: var(--color-border-strong);
+}
+
+.btn-secondary:hover {
+  background: var(--color-paper-sunken);
+  border-color: var(--color-ink-faint);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-ink-muted);
+  padding-left: 0.6rem;
+  padding-right: 0.6rem;
+}
+
+.btn-ghost:hover {
+  background: var(--color-paper-sunken);
+  color: var(--color-ink);
+}
+
+.btn-secondary:disabled,
+.btn-ghost:disabled {
+  opacity: 0.5;
+}
+
+/* ============================================================================================
+   HOLY CORNER'S OWN (HC-002)
+
+   The shell's layout classes. Tokens only: every value here is a var() or a hairline 1px, because
+   `scripts/design-lint.mjs` fails the build otherwise and because a value invented here is the
+   first step to three studios that no longer match.
+
+   Nothing in this section is a colour. If a rule below ever needs one, it takes an existing
+   --color-* or --tone-*, and if neither fits, that is a conversation about the design system
+   rather than a line in this file.
+   ============================================================================================ */
+
+/* The account menu's placeholder. It says in words that sign-in is not built, rather than
+   rendering a control that does nothing (design contract: no dead UI). HC-003 replaces it. */
+.topbar-account {
+  margin-left: 1.5rem;
+  font-family: var(--font-sans);
+  font-size: var(--fs-meta);
+  color: var(--color-ink-muted);
+  white-space: nowrap;
+}
+
+/* ---------- The sections nav, and the drawer it becomes on a phone ----------
+   The two halves are mutually exclusive at every width, so a reader never sees both and the page
+   never carries a hidden copy of the navigation that could add to its scroll width. */
+/* The nav takes the spacer the eyebrow used to carry, so the bar reads wordmark, then sections,
+   then the account, with the space shared between them rather than all of it in one gap. */
+.topnav-wide { margin-left: auto; }
+
+.topnav-toggle { display: none; }
+
+.topnav-drawer {
+  position: absolute;
+  top: var(--topbar-height);
+  left: 0;
+  right: 0;
+  z-index: 49;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-paper);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.topnav-drawer-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.75rem 1.5rem;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-ink);
+}
+
+.topnav-drawer-link:hover { background: var(--color-paper-sunken); }
+
+.topnav-drawer-label {
+  font-family: var(--font-sans);
+  font-size: var(--fs-body-sm);
+  font-weight: 500;
+}
+
+/* The blurb is carried into the drawer deliberately. On a wide screen it is the link's title
+   attribute, which a phone has no way to show, so the one place a reader cannot hover is the one
+   place the explanation is visible. */
+.topnav-drawer-blurb {
+  font-size: var(--fs-meta);
+  color: var(--color-ink-muted);
+}
+
+@media (max-width: 48rem) {
+  .topnav-wide { display: none; }
+  .topnav-toggle { display: inline-flex; margin-left: auto; }
+  /* The placeholder is the first thing to go: it is the least useful text on the bar, and on a
+     393px screen the wordmark and the way into the sections are what must survive. */
+  .topbar-account { display: none; }
+}
+
+/* ---------- The tone key on the placeholder home page ----------
+   It is on a screen so the five tones can be checked against the two studios by eye. HC-030
+   replaces this page with the group ledger and the key goes with it. */
+.tone-key { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; }
+
+.tone-key-row {
+  display: grid;
+  grid-template-columns: minmax(0, 10rem) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: baseline;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tone-key-row dt {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: var(--fs-body-sm);
+}
+
+.tone-key-row dd { margin: 0; color: var(--color-ink-soft); font-size: var(--fs-body-sm); }
+
+/* A square, not a dot, and not an emoji: `design-lint` bans a glyph standing in for a state,
+   because an emoji is a different typeface at a size nobody chose and it will not take the tone
+   colour (fountainbridge FB-210). */
+.tone-key-swatch {
+  width: 0.75rem;
+  height: 0.75rem;
+  flex: none;
+  border: 1px solid var(--color-border-strong);
+}
+
+.tone-key-swatch[data-tone='ok'] { background: var(--tone-ok); }
+.tone-key-swatch[data-tone='working'] { background: var(--tone-working); }
+.tone-key-swatch[data-tone='attention'] { background: var(--tone-attention); }
+.tone-key-swatch[data-tone='blocked'] { background: var(--tone-blocked); }
+.tone-key-swatch[data-tone='idle'] { background: var(--tone-idle); }
+
+/* ---------- The wordmark, with a two-character second line ----------
+   Fountainbridge stacks BRUNTSFIELD over FOUNDRY and grassmarket over ADVISORY. Both second lines
+   are long enough to sit under the first and read as one mark. "OS" is two characters, and stacked
+   plain it reads as a subtitle that got truncated rather than as part of a lockup.
+
+   The rule is what binds them. It is the same device the Bruntsfield sign-in lockup already uses
+   (`.signin .wordmark`, FB-189: "a 24px serif caps wordmark over a hairline rule"), borrowed here
+   for the top bar because this is the product whose second line is short. Found by rendering the
+   bar and looking at it, which is the only way this kind of thing is ever found. */
+.topbar .wordmark-name {
+  border-bottom: 1px solid var(--color-border-strong);
+  padding-bottom: 0.12rem;
+}
+
+.topbar .wordmark-sub { padding-top: 0.18rem; }
