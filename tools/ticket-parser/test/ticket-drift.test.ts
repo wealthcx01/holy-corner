@@ -276,3 +276,66 @@ describe('the drift check and the parser agree on what a finished status is', ()
     }
   });
 });
+
+/**
+ * HC-057: a commit that FILES a ticket has not shipped it, whatever its subject says.
+ *
+ * This is the case that turned `main` red on the second merge this repository ever made.
+ */
+describe('filing a ticket is not shipping it (HC-057)', () => {
+  test('the real commit that turned main red is evidence for nothing', () => {
+    assert.deepEqual(ticketsShippedBy({
+      subject: 'HC-056: file the ticket to take the negotiated terms out of the public repos (#2)',
+      paths: [
+        'docs/tickets/HC-056-take-the-negotiated-terms-out-of-the-public-repositories.md',
+        'docs/BACKLOG.md',
+        'tools/ticket-parser/src/parse.ts',
+      ],
+      addedPaths: ['docs/tickets/HC-056-take-the-negotiated-terms-out-of-the-public-repositories.md'],
+    }), []);
+  });
+
+  test('a commit that files one ticket and ships another still reports the one it shipped', () => {
+    // The whole point: the new rule must not swallow real evidence alongside the false evidence.
+    assert.deepEqual(ticketsShippedBy({
+      subject: 'HC-050: the knowledge base, and file HC-099 for the follow-up',
+      paths: ['lib/knowledge.ts', 'docs/tickets/HC-099-follow-up.md'],
+      addedPaths: ['docs/tickets/HC-099-follow-up.md'],
+    }), ['HC-050']);
+  });
+
+  test('shipping a ticket whose file this commit MODIFIED still counts', () => {
+    // The ordinary case: a ticket is filed earlier, then shipped in a commit that ticks its boxes
+    // and sets its status. Its file changes but is not added. This must not regress.
+    assert.deepEqual(ticketsShippedBy({
+      subject: 'HC-002: app shell',
+      paths: ['app/layout.tsx', 'docs/tickets/HC-002-app-shell.md'],
+      addedPaths: [],
+    }), ['HC-002']);
+  });
+
+  test('a moved ticket file is not a filing', () => {
+    // `--name-status` reports a rename as R100, not A, so a renamed ticket keeps counting.
+    assert.deepEqual(ticketsShippedBy({
+      subject: 'HC-003: sign-in',
+      paths: ['lib/authz.ts', 'docs/tickets/HC-003-renamed.md'],
+      addedPaths: [],
+    }), ['HC-003']);
+  });
+
+  test('with no added-path information nothing is filtered, so older callers behave as before', () => {
+    assert.deepEqual(ticketsShippedBy({
+      subject: 'HC-056: file it',
+      paths: ['docs/tickets/HC-056-x.md', 'lib/x.ts'],
+    }), ['HC-056']);
+  });
+
+  test('a ticket filed AND shipped by one commit is missed, and that is the accepted trade', () => {
+    // Documented rather than fixed. The check prefers a missed report to a wrong one, everywhere.
+    assert.deepEqual(ticketsShippedBy({
+      subject: 'HC-098: file it and ship it in one go',
+      paths: ['docs/tickets/HC-098-x.md', 'lib/x.ts'],
+      addedPaths: ['docs/tickets/HC-098-x.md'],
+    }), []);
+  });
+});

@@ -186,6 +186,12 @@ export function isShippingCommit(paths: string[]): boolean {
   return paths.some((p) => p.trim() !== '' && !p.startsWith('docs/tickets/'));
 }
 
+/** The ticket a `docs/tickets/` path belongs to, or null when the path is not a ticket file. */
+function ticketIdFromPath(path: string): string | null {
+  const name = path.trim().split('/').pop() ?? '';
+  return path.trim().startsWith('docs/tickets/') ? idFromFilename(name) : null;
+}
+
 const TICKET_ID = /\b[A-Z]{2,}[0-9]*-\d+[a-z]?\b/g;
 
 /**
@@ -201,14 +207,46 @@ const TICKET_ID = /\b[A-Z]{2,}[0-9]*-\d+[a-z]?\b/g;
 const TICKET_ID_RANGE = /\b[A-Z]{2,}[0-9]*-\d+[a-z]?\s*(?:\.{2,3}|…|—|–|-{1,2}>?|\bto\b)\s*[A-Z]{2,}[0-9]*-\d+[a-z]?\b/g;
 
 /**
- * Which tickets one commit is evidence for — the two precise signals, and nothing looser.
+ * Which tickets one commit is evidence for - the precise signals, and nothing looser.
  *
  * Returns nothing for a commit that shipped no code, whatever its message says: a ticket-filing
  * commit naming five tickets is evidence about none of them.
+ *
+ * HC-057 added the last rule below, after `main` went red on the second merge this repository ever
+ * made. The commit was:
+ *
+ *     HC-056: file the ticket to take the negotiated terms out of the public repos (#2)
+ *
+ * It CREATED `docs/tickets/HC-056-...md` and it also changed `tools/ticket-parser/src/parse.ts`.
+ * So it changed code, and its subject named HC-056, and this function reported HC-056 as shipped
+ * while the ticket correctly said Todo. The check that exists to stop the board lying was the thing
+ * lying, which is the exact failure its own header warns about.
+ *
+ * The header also says no file-based signal can separate filing from shipping. That is true of the
+ * signal fountainbridge tested, which was "the ticket's file CHANGED": when one pull request ships
+ * one ticket and files five more, all six files change. It is not true of a narrower one. **A
+ * commit that ADDS a ticket's file is the commit that filed it.** You cannot file a ticket twice,
+ * so a ticket being shipped was filed in an earlier commit and its file is modified or untouched
+ * here, never added.
+ *
+ * The cost is honest and small, and it is the same trade made everywhere else in this file: a
+ * ticket filed and shipped by one single commit is not caught. A missed report beats a wrong one.
  */
-export function ticketsShippedBy(commit: { subject: string; paths: string[] }): string[] {
+export function ticketsShippedBy(commit: {
+  subject: string;
+  paths: string[];
+  /** Paths this commit ADDED. Optional: omitted means "unknown", and nothing is filtered. */
+  addedPaths?: string[];
+}): string[] {
   if (!isShippingCommit(commit.paths)) return [];
   // FB-145: ranges out first. An id only counts when the subject names it on its own.
   const subject = commit.subject.replace(TICKET_ID_RANGE, ' ');
-  return [...new Set(subject.match(TICKET_ID) ?? [])];
+  const named = new Set(subject.match(TICKET_ID) ?? []);
+
+  // HC-057: whatever the subject says, a ticket this commit FILED has not shipped.
+  for (const path of commit.addedPaths ?? []) {
+    const filed = ticketIdFromPath(path);
+    if (filed) named.delete(filed);
+  }
+  return [...named];
 }
