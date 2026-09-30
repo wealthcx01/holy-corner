@@ -1,8 +1,13 @@
 # HC-057 — A commit that files a ticket has not shipped it
 
-**Status:** Todo · **Phase:** 0 · **Depends on:** HC-001 · **Repo:** holy-corner ·
+**Status:** Done · **Phase:** 0 · **Depends on:** HC-001 · **Repo:** holy-corner ·
 **Branch:** `hc-057-a-commit-that-files-a-ticket-has-not-shipped-it` ·
 One ticket = one branch = one PR.
+
+**Set to Done in its own pull request, deliberately.** This ticket is filed and shipped by one
+commit, which is exactly the case the fix below does NOT catch. Relying on the check to notice
+would leave the board saying Todo for work that shipped, in the pull request about the board
+telling the truth. The accepted gap is documented; it is not an excuse to use it.
 
 ## Why this matters (for John)
 
@@ -69,14 +74,14 @@ a wrong one.
 
 ## Acceptance criteria
 
-- [ ] `make ticket-drift` passes on `main` at `f993fb8`, the commit that is red today.
-- [ ] A commit that adds `docs/tickets/HC-099-x.md` and changes `lib/x.ts`, subjected
+- [x] `make ticket-drift` passes on `main` at `f993fb8`, the commit that was red.
+- [x] A commit that adds `docs/tickets/HC-099-x.md` and changes `lib/x.ts`, subjected
       `HC-099: file it`, is evidence for nothing.
-- [ ] The same commit, if its subject also names HC-050 and it did not add HC-050's file, is still
+- [x] The same commit, if its subject also names HC-050 and it did not add HC-050's file, is still
       evidence that HC-050 shipped.
-- [ ] A commit that MODIFIES a ticket's file while shipping it still counts, which is the ordinary
+- [x] A commit that MODIFIES a ticket's file while shipping it still counts, which is the ordinary
       case and must not regress.
-- [ ] Mutation check: reverting the change turns the new tests red.
+- [x] Mutation check: reverting the change turns three of the new tests red.
 
 ## Verification
 

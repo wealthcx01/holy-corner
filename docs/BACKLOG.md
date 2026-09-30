@@ -25,6 +25,7 @@ from John. HC-002 is next and in progress.
 | HC-054 | Protect the main branch | Superseded by HC-001 — the repo went public, so the block went away |
 | HC-055 | railway.json is deprecated and stops working on 1 December 2026 | Todo |
 | HC-056 | Take the negotiated terms out of the public repositories | Todo — needs a decision from John on the existing history |
+| HC-057 | A commit that files a ticket has not shipped it | Done |
 
 ## Phase 1 — The record
 
