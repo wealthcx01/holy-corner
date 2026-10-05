@@ -1,9 +1,12 @@
 import { NotYet } from '@/components/NotYet';
 import { requireSection } from '@/lib/session';
 
+/** This section's path, named once so the gate and the way back cannot disagree. */
+const SECTION = '/record';
+
 export default async function Record() {
   // The gate. Same decision as the navigation, so the two cannot drift (lib/session.ts).
-  const principal = await requireSection('/record');
+  const principal = await requireSection(SECTION);
 
   return (
     <NotYet
@@ -13,6 +16,7 @@ export default async function Record() {
             them, and what those contracts actually say, as terms a person can read rather than a
             PDF somebody has to open."
       role={principal.role}
+      href={SECTION}
     />
   );
 }

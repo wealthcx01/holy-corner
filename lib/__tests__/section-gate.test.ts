@@ -34,15 +34,42 @@ describe('every page behind the sign-in gates itself', () => {
   });
 
   it('gates itself: every page but the root calls requireSection with its own route', () => {
+    // TWO SPELLINGS ARE ALLOWED, and both must name the page's OWN route, which is the whole point:
+    //
+    //   requireSection('/money')                  the route written at the call
+    //   const SECTION = '/money'; requireSection(SECTION)
+    //
+    // The second exists because the unbuilt sections need their route twice - once to gate the
+    // page and once to work out whether the "way back" link leads anywhere - and two literals that
+    // must agree are two literals that will eventually disagree. Naming it once is the fix.
+    //
+    // What is NOT allowed is `requireSection(somethingElse)`: a page gated on a route that is not
+    // its own is a page gated on the wrong thing, and the test would have nothing to say about it.
     const missing: string[] = [];
     for (const file of files) {
       const src = readFileSync(file, 'utf8');
       const rel = file.slice(GROUP.length).replace(/\\/g, '/').replace(/\/page\.tsx$/, '');
       const href = rel === '' ? '/' : rel;
       if (href === '/') continue; // the root routes by role instead; its own test is below
-      if (!src.includes(`requireSection('${href}')`)) missing.push(`${href} (${file.split('/').slice(-2).join('/')})`);
+      const direct = src.includes(`requireSection('${href}')`);
+      const viaConst =
+        src.includes(`const SECTION = '${href}';`) && src.includes('requireSection(SECTION)');
+      if (!direct && !viaConst) missing.push(`${href} (${file.split('/').slice(-2).join('/')})`);
     }
     expect(missing, `these pages do not gate themselves:\n  - ${missing.join('\n  - ')}`).toEqual([]);
+  });
+
+  it('an unbuilt section tells the same route to the gate and to the way back', () => {
+    // The pair that `SECTION` exists to keep together. If a page ever declares SECTION and then
+    // hands NotYet a different route, the "way back" link starts deciding whether it leads
+    // anywhere using the wrong page - which is how the self-link this ticket removed would come
+    // back, silently, on one section at a time.
+    for (const file of files) {
+      const src = readFileSync(file, 'utf8');
+      if (!src.includes('const SECTION =')) continue;
+      expect(src, `${file.split('/').slice(-2).join('/')} gates on SECTION but does not pass it on`)
+        .toContain('href={SECTION}');
+    }
   });
 
   it('the root routes by role rather than being left open', () => {

@@ -1624,9 +1624,14 @@ body:has(.rail) .main {
 @media (max-width: 48rem) {
   .topnav-wide { display: none; }
   .topnav-toggle { display: inline-flex; margin-left: auto; }
-  /* The placeholder is the first thing to go: it is the least useful text on the bar, and on a
-     393px screen the wordmark and the way into the sections are what must survive. */
-  .topbar-account { display: none; }
+  /* The account control STAYS. HC-002 hid it here, reasoning that on a 393px screen the wordmark
+     and the sections are what must survive. That was wrong in the one case that matters most:
+     somebody signed in with no role has NO sections, so this is the only control on their page, and
+     hiding it strands them on a phone with the wrong account and no way to sign out. HC-006's
+     mobile gate caught it.
+     What goes instead is the role label inside the button, which is the part a phone can spare. */
+  .topbar-account { margin-left: 0.5rem; }
+  .topbar-account-role { display: none; }
 }
 
 /* ---------- The tone key on the placeholder home page ----------

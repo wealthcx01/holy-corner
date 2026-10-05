@@ -10,7 +10,7 @@ name: CI
 #
 # Which ticket makes each job real:
 #   Lint, Typecheck, Test, Build, Design contract  -> HC-002 (the app and design-lint)
-#   Playwright UI gate                             -> HC-006
+#   Playwright UI gate                             -> real now, in HC-006
 #   Copy contract                                  -> HC-009
 #   Contracts parity                               -> HC-005
 #   Tickets match the history, Parse tickets       -> real now, in this ticket
@@ -122,27 +122,61 @@ jobs:
     # removing it (FB-114, amended 2026-08-19). If a library ever is missing, the tests fail in
     # seconds with a loader error naming it, which is a better failure than apt retrying a mirror.
     #
-    # HC-006 makes this job real. When it does, port fountainbridge's two cache steps as well:
-    # resolve the installed @playwright/test version into $GITHUB_OUTPUT, then actions/cache@v4 on
-    # ~/.cache/ms-playwright keyed by that version, with the install guarded on a cache miss. The
-    # key must be the version, so that a version bump misses the cache instead of testing against
-    # a browser the new version never asked for. There is no cache here yet.
+    # THE BROWSER CACHE IS KEYED ON THE PLAYWRIGHT VERSION, not on the lockfile hash and not on a
+    # fixed string. Each @playwright/test release pins the exact Chromium build it was tested
+    # against. A key that survives a version bump hands the new Playwright the old browser, and the
+    # failure that follows is a real red gate about nothing - which is the worst kind, because the
+    # next person learns to re-run it. Missing the cache on a bump costs about 30 seconds.
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        timeout-minutes: 5
+        run: npm ci --no-audit --no-fund
+
+      # Read from the tree npm ci just produced, so the key is the version that will actually run.
+      # Reading package.json instead would give a RANGE ("^1.5.0"), and every version inside that
+      # range would share one cache entry, which is precisely the bug this key exists to avoid.
+      - name: Work out which Playwright is installed
+        id: pw
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Restore the browser cache
+        id: browser-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ms-playwright-chromium-${{ runner.os }}-${{ steps.pw.outputs.version }}
+
+      # Guarded on a miss. NO `--with-deps` (see above).
+      - name: Install Chromium
+        if: steps.browser-cache.outputs.cache-hit != 'true'
+        timeout-minutes: 5
+        run: npx playwright install chromium
+
+      # The gate builds the app itself, through playwright.config.ts's webServer, because the
+      # ceilings are readings of the PRODUCTION build. `next dev` renders the same markup at a
+      # different weight, and a reading taken against it is not the reading the ceiling means.
       - name: Run the UI gate
         timeout-minutes: 15
-        run: |
-          if [ -f playwright.config.ts ]; then
-            npm ci --no-audit --no-fund
-            npx playwright install chromium
-            npm run test:e2e
-          else
-            echo "No UI gate yet - it is a no-op until HC-006 adds Playwright."
-          fi
+        run: npm run test:e2e
+
+      # Built even when the gate fails, and especially then: a failing height is a number, and the
+      # picture is how somebody decides whether the screen grew for a good reason.
+      - name: Build the gallery
+        if: always()
+        # A REPORTING step must never be the thing that turns this gate red. If the build fell over
+        # before a single screenshot was taken, the gallery has nothing to render and exits 2 - and
+        # a second red X next to "Build the gallery" would send the reader looking in the wrong
+        # place for a failure that is already named above it.
+        continue-on-error: true
+        run: npm run gallery -- --md >> "$GITHUB_STEP_SUMMARY"
+
       - name: Upload UI-gate gallery (screenshots + report)
         if: always()
         uses: actions/upload-artifact@v4
