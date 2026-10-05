@@ -25,3 +25,10 @@ data/uploads/
 .DS_Store
 Thumbs.db
 e2e/__screenshots__/
+
+# gbrain writes these into the repository root and they must never be committed.
+# `.gbrain-owner.json` carries a TOKEN. This repository is public, and every commit in this lane
+# is made with `git add -A`, so without this line one `gbrain put` followed by one commit would
+# publish it (CLAUDE.md #9: no secrets in the repo, not in code, tickets, fixtures or docs).
+# The `.md` beside it is gbrain's copy of a page it already holds; the brain is the original.
+.gbrain-owner.json
