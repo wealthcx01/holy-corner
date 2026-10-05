@@ -86,6 +86,7 @@ The deploy would fail at the first word. Do HC-059 first.
 | HC-053 | The Foundry landing page, hosted here | Todo |
 | HC-058 | Two of the five status tones are the same colour (found by the UI gate) | Todo |
 | HC-059 | The migrate script needs bun, which the deploy does not have (blocks HC-007) | Todo |
+| HC-060 | gbrain writes a token into the repository root and nothing ignored it | Done |
 
 ## Companion work in other repos
 
