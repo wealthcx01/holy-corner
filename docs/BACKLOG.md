@@ -4,10 +4,20 @@ Detail lives in `docs/tickets/`. Status here mirrors each ticket's `**Status:**`
 `make ticket-drift` fails CI when the two disagree with git. Ticket numbers are allocated as
 `max(existing)+1` at filing time.
 
-Last reconciled: 2026-09-30. HC-001 is fully done: branch protection is applied and the repository
-is registered and synced as a gbrain source. HC-054 is superseded, because the repository went
-public and branch protection became available. HC-055 and HC-056 are open and each needs a decision
-from John. HC-002 is next and in progress.
+Last reconciled: 2026-10-05. **Phase 0 is seven tickets in and the UI gate is live**: HC-001 to
+HC-006 and HC-042 have shipped, so the hub has a shell, sign-in with server-side scoping, a data
+layer, shared contracts, the approval gate, and a browser check that looks at every screen at both
+sizes on every pull request.
+
+HC-054 is superseded: the repository went public and branch protection became available.
+
+**Three things need a decision from John before the work that depends on them starts:** HC-055
+(Railway stops reading `railway.json` on 1 December 2026, all three repos), HC-056 (negotiated
+terms in public git history), and HC-058 (two of the five status tones are the same colour).
+
+**HC-059 blocks HC-007**, which is the next ticket: the Railway start command runs `npm run
+db:migrate`, which runs under `bun`, which is not in this stack and is not on the Railway image.
+The deploy would fail at the first word. Do HC-059 first.
 
 ## Phase 0 — Foundations
 
@@ -18,7 +28,7 @@ from John. HC-002 is next and in progress.
 | HC-003 | Sign-in: Google and the password door, roles, the admin allowlist, server-side scoping | Done |
 | HC-004 | The data layer: Postgres on Railway, migrations, one repository, PGLite for tests | Done |
 | HC-005 | bcap-contracts for the hub: new types, vendored schemas, generated TypeScript, a parity check | Done |
-| HC-006 | The UI gate: Playwright, the screenshot gallery, the design-conformance scorecard | In review |
+| HC-006 | The UI gate: Playwright, the screenshot gallery, the design-conformance scorecard | Done |
 | HC-007 | Deploy: the Railway service, health, the domain, the OAuth client, the env table | Todo |
 | HC-008 | Seed and fixtures: the commercial record as data, and a demo mode | Todo |
 | HC-009 | copy-lint: plain English as a mechanism, not a hope | Todo |

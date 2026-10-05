@@ -1,6 +1,6 @@
 # HC-006 — The UI gate: Playwright, the screenshot gallery, the design-conformance scorecard
 
-**Status:** In review · **Phase:** 0 · **Depends on:** HC-003 · **Repo:** holy-corner ·
+**Status:** Done · **Phase:** 0 · **Depends on:** HC-003 · **Repo:** holy-corner ·
 **Branch:** `hc-006-the-ui-gate` · One ticket = one branch = one PR.
 
 ## Why this matters (for John)
