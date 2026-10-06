@@ -130,6 +130,28 @@ there; nothing here relaxes them.
 - **CI:** GitHub Actions, ten named jobs whose names never change so branch protection never needs
   reconfiguring (fountainbridge `ci.yml` is the template).
 
+## Checks
+
+The commands the factory's house workflow (`bruntsfield-ticket`) runs, in this order,
+from the repo root, before anything is pushed. One command per line. Keep this list
+true: the workflow runs exactly these and never guesses.
+
+```bash
+npm ci --no-audit --no-fund
+npm run lint
+npm run typecheck
+npm test
+AUTH_SECRET=build-time-placeholder-not-a-real-secret AUTH_TRUST_HOST=true npm run build
+make design-lint
+make copy-lint
+make ticket-drift
+make contracts-parity
+make parse-tickets
+```
+
+The Playwright UI gate (`npm run test:e2e`) is left out: Chromium can't run on the planning box. CI
+still runs it, and it is still required. The build line uses the same throwaway `AUTH_SECRET` as CI.
+
 ## Layout
 
 ```
