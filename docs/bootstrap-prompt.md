@@ -1,9 +1,9 @@
 # Workshop bootstrap — the first prompt for the holy-corner lane
 
 Prerequisite (done 2026-09-09): `wealthcx01/holy-corner` exists, private, with the docs and the
-ticket set on `main`, and is cloned at `~/projects/holy-corner` on the dev VM.
+ticket set on `main`, and is cloned at `~/projects/firm/holy-corner` on the dev VM.
 
-In a fresh tmux window on the VM (`ssh claudedev`, then `cd ~/projects/holy-corner`), start
+In a fresh tmux window on the VM (`ssh claudedev`, then `cd ~/projects/firm/holy-corner`), start
 Claude Code and paste:
 
 ---
@@ -24,8 +24,8 @@ Do the following, in order:
    ticket in docs/tickets/. Then skim docs/source/ for the February 2026 originals; the plan wins
    where they disagree. Record a lane-opening note in gbrain (`holy-corner-lane-opening`): purpose,
    D1–D10, the verticals, the phase-0 dependency order from CLAUDE.md.
-3. Read the two sibling repos' CLAUDE.md files on this machine (~/projects/fountainbridge and
-   ~/projects/grassmarket) and fountainbridge's docs/tickets/FB-136, FB-092, FB-097, FB-124,
+3. Read the two sibling repos' CLAUDE.md files on this machine (~/projects/firm/fountainbridge and
+   ~/projects/firm/grassmarket) and fountainbridge's docs/tickets/FB-136, FB-092, FB-097, FB-124,
    FB-171, and grassmarket's docs/phase-2-seams.md and docs/tickets/GRS-0132, GRS-0208. These are
    the rules and the seams Holy Corner inherits.
 4. Execute HC-001 (docs/tickets/HC-001-scaffold-the-repo.md) on branch hc-001-scaffold-the-repo,

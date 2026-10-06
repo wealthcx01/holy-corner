@@ -34,8 +34,8 @@ reads is named in `.env.example`.
 | Where | What |
 |---|---|
 | `C:\dev\holy-corner` | local working copy (John's machine) |
-| `~/projects/holy-corner` on the dev VM (`ssh claudedev`) | the lane's working copy |
+| `~/projects/firm/holy-corner` on the dev VM (`ssh claudedev`) | the lane's working copy |
 | `wealthcx01/holy-corner` (private) | the repo of record |
 | `elite-vault/` (gitignored) | read-only reference copy of the LabCI Elite Vault project the core is adapted from |
-| `C:\dev\Grassmarket` / `~/projects/grassmarket` | the Advisory Studio, and `packages/bcap_contracts` |
-| `C:\dev\fountainbridge` / `~/projects/fountainbridge` | the Foundry Studio, and the design tokens |
+| `C:\dev\Grassmarket` / `~/projects/firm/grassmarket` | the Advisory Studio, and `packages/bcap_contracts` |
+| `C:\dev\fountainbridge` / `~/projects/firm/fountainbridge` | the Foundry Studio, and the design tokens |
