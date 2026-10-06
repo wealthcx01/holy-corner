@@ -178,3 +178,5 @@ dependency order.
 
 Phase 0, before HC-001. The repo holds docs and tickets only. Next: HC-001 on branch
 `hc-001-scaffold`.
+
+**Factory log:** when you start a ticket, open its PR, or come back after a crash, run `factory-log firm ticket.started|pr.opened|lane.recovered holy-corner <ticket-id> [note]` (e.g. `factory-log firm ticket.started holy-corner HC-050`); the manual is OPS.md in wealthcx01/cowgate.
