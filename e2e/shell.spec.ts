@@ -210,6 +210,29 @@ test.describe('the four roles', () => {
     await doesNotDragSideways(page, '/ as admin');
   });
 
+  test('no two status tones look the same', async ({ page }) => {
+    // HC-058. `ok` and `working` were both Bottle Green, and every other check passed, because
+    // none of them looked. This reads the colour the browser actually painted, not the stylesheet.
+    await signInAs(page, CAST.admin);
+    await page.goto('/');
+    const swatches = page.locator('.tone-key-swatch[data-tone]');
+    await expect(swatches).toHaveCount(5);
+    const painted = await swatches.evaluateAll((elements) =>
+      elements.map((el) => ({
+        tone: el.getAttribute('data-tone') ?? '',
+        colour: getComputedStyle(el).backgroundColor,
+      })),
+    );
+    const byColour = new Map<string, string[]>();
+    for (const { tone, colour } of painted) {
+      byColour.set(colour, [...(byColour.get(colour) ?? []), tone]);
+    }
+    const collisions = [...byColour]
+      .filter(([, tones]) => tones.length > 1)
+      .map(([colour, tones]) => `${tones.join(' and ')} are both ${colour}`);
+    expect(collisions, 'a reader cannot tell these tones apart').toEqual([]);
+  });
+
   test('the record, as staff', async ({ page }) => {
     await signInAs(page, CAST.staff);
     await page.goto('/record');

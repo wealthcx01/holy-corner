@@ -11,9 +11,9 @@ sizes on every pull request.
 
 HC-054 is superseded: the repository went public and branch protection became available.
 
-**Three things need a decision from John before the work that depends on them starts:** HC-055
-(Railway stops reading `railway.json` on 1 December 2026, all three repos), HC-056 (negotiated
-terms in public git history), and HC-058 (two of the five status tones are the same colour).
+**Two things need a decision from John before the work that depends on them starts:** HC-055
+(Railway stops reading `railway.json` on 1 December 2026, all three repos) and HC-056 (negotiated
+terms in public git history).
 
 **HC-059 blocks HC-007**, which is the next ticket: the Railway start command runs `npm run
 db:migrate`, which runs under `bun`, which is not in this stack and is not on the Railway image.
@@ -84,7 +84,7 @@ The deploy would fail at the first word. Do HC-059 first.
 | HC-051 | The template library: every agreement we sign, versioned, with variables | Todo |
 | HC-052 | The public site's login router and the Holy Corner front door | Todo |
 | HC-053 | The Foundry landing page, hosted here | Todo |
-| HC-058 | Two of the five status tones are the same colour (found by the UI gate) | Todo |
+| HC-058 | Two of the five status tones are the same colour (found by the UI gate) | In progress — fixed here; the fountainbridge change is not open yet |
 | HC-059 | The migrate script needs bun, which the deploy does not have (blocks HC-007) | Todo |
 | HC-060 | gbrain writes a token into the repository root and nothing ignored it | Done |
 
