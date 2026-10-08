@@ -1,7 +1,8 @@
 # HC-058 — Two of the five status tones are the same colour
 
 **Branch:** `hc-058-two-status-tones-are-the-same-colour`
-**Status:** Todo
+**Status:** In progress
+**Shipped in part:** the fix and its test are in Holy Corner. The matching change in fountainbridge is not open yet, because this branch could only change this repository.
 **Found by:** HC-006, the UI gate, on its first run. Nothing else in the repository could see it.
 
 ## What is wrong
@@ -67,11 +68,41 @@ colours is already more than a colour-blind reader can separate.
   same kind of question.
 - Re-screenshot `/` at both sizes and update `docs/design-conformance.md`.
 
+## Decision (8 October 2026, approved by John Gallagher)
+
+Options 1 and 2 together, with no new colour.
+
+- **Colour.** `--tone-working` now points at `--color-accent-tint` (`#e4eae3`), the pale Bottle
+  Green already in the palette. No hex value was invented or changed.
+- **Shape.** The `working` swatch has a 1px Bottle Green edge, so it reads as a hollow square
+  beside `ok`'s solid one. That works for a reader who cannot see colour well.
+- **Option 3 was turned down.** "Paid" and "being sent" are different facts on a money screen.
+- **The ink-soft grey was turned down.** It is too close to `idle`'s grey and reads as "nothing
+  happening".
+
+The reasons are written up in `docs/design-contract.md`, section 2. The pale green is a fill and
+must never be used as a text colour.
+
+Left alone on purpose: `.mark-working`, `.engine-dot` and `.engine-run-mark.tone-working` in
+`app/globals.css` came over from fountainbridge and are not used anywhere in Holy Corner. If a
+later ticket starts using them, they will show the pale fill without the green edge. The
+fountainbridge change is the right place to give them the edge.
+
+**Still to do before this ticket is Done:**
+
+- A person opens `04-group-admin.png` and `22-phone-group-admin.png` from the CI run on this
+  ticket's pull request and confirms the two squares look different. Chromium cannot start on the
+  machine this was built on, so nobody has seen the new square yet, and the new test has not been
+  seen to fail on the old colours and pass on the new ones. CI runs it.
+- Record the two `/` heights from that run in `docs/design-conformance.md`.
+- Open the matching change in fountainbridge and link it here.
+
 ## Acceptance criteria
 
-- [ ] No two of the five tones resolve to the same colour, and a test says so by reading the
-      rendered values rather than the stylesheet source.
+- [x] No two of the five tones resolve to the same colour, and a test says so by reading the
+      rendered values rather than the stylesheet source. (`e2e/shell.spec.ts`, "no two status
+      tones look the same". Runs in CI; Chromium cannot start on the machine it was written on.)
 - [ ] `ok` and `working` can be told apart in `04-group-admin.png` at 1440×1000 and in the phone
       shot at 393×851, by a person looking.
-- [ ] `docs/design-contract.md` records which option was taken and why.
+- [x] `docs/design-contract.md` records which option was taken and why.
 - [ ] If the palette changed, the companion fountainbridge change is open and linked here.

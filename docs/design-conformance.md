@@ -43,12 +43,19 @@ not the same number — see "The same screen is not the same height everywhere" 
 | `/login` | signed out | 1,000px | 727px | 1,100px | 1,000px |
 | `/not-authorized` (no role) | signed in, no role | 1,000px | 727px | 1,100px | 1,000px |
 | `/not-authorized` (wrong domain) | `@gmail.com` | 1,000px | — | 1,100px | — |
-| `/` the group ledger | admin | 1,000px | 980px | 1,100px | 1,200px |
+| `/` the group ledger | admin | 1,000px ¹ | 980px ¹ | 1,100px | 1,200px |
 | `/` with the drawer open | admin | — | 980px | — | 1,200px |
 | `/record` | staff | 1,000px | 727px | 1,100px | 1,000px |
 | `/money` | finance | 1,000px | 727px | 1,100px | 1,000px |
 | `/needs-you` | admin | 1,000px | — | 1,100px | — |
 | `/what-happened` | admin | 1,000px | — | 1,100px | — |
+
+¹ **HC-058 changed this screen and these two readings are not yet re-taken.** HC-058 (8 October
+2026) changed the colour and edge of one square in the tone key. The square is the same size, so
+the heights should not move. They must still be read from the CI run on the HC-058 pull request,
+and `04-group-admin.png` and `22-phone-group-admin.png` looked at by a person, before it merges.
+The branch was built on a machine where Chromium cannot start, so nobody has seen the new square
+yet. Replace this note with the readings and the date they were looked at.
 
 **Every desktop screen reads exactly 1,000px, and that is not a coincidence — it is the viewport.**
 Nothing in the product is tall enough to scroll at 1440×1000 yet, so the page height *is* the
@@ -94,7 +101,9 @@ one of those checks passed, and every one was right about what it asked.
 `#1a3b26`. The group ledger prints a key that says "a reader learns a colour here and it means the
 same thing on every screen", above two identical green squares with different labels. Filed as
 **HC-058**, because changing a brand colour is a design decision and not a line in this pull
-request.
+request. **Fixed by HC-058:** `working` is now a pale green square with a Bottle Green edge, and a
+test on `/` fails if any two of the five swatches are painted the same colour. The companion
+change in fountainbridge is still owed.
 
 **2. Half the roles were offered a link to the page they were already reading.** Staff land on
 `/record` and finance on `/money`; both sections are unbuilt, so both got a "Back to the record" /

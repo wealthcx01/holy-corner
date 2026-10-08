@@ -94,9 +94,12 @@
    *   attention needs a human, or a next step the founder must take (never a crash)
    *   blocked   it failed, or cannot proceed
    *   idle      nothing is happening, or we do not know
+   *
+   * `working` is a pale green fill with a Bottle Green edge (HC-058). It used to be Bottle Green,
+   * the same colour as `ok`, so the two could not be told apart. It is a fill, never a text colour.
    */
   --tone-ok: var(--color-ok);
-  --tone-working: var(--color-accent);
+  --tone-working: var(--color-accent-tint);
   --tone-attention: var(--color-warn);
   --tone-blocked: var(--color-error);
   --tone-idle: var(--color-ink-muted);
@@ -1669,7 +1672,10 @@ body:has(.rail) .main {
 }
 
 .tone-key-swatch[data-tone='ok'] { background: var(--tone-ok); }
-.tone-key-swatch[data-tone='working'] { background: var(--tone-working); }
+.tone-key-swatch[data-tone='working'] {
+  background: var(--tone-working);
+  border-color: var(--color-accent);
+}
 .tone-key-swatch[data-tone='attention'] { background: var(--tone-attention); }
 .tone-key-swatch[data-tone='blocked'] { background: var(--tone-blocked); }
 .tone-key-swatch[data-tone='idle'] { background: var(--tone-idle); }

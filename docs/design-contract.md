@@ -54,10 +54,34 @@ Five tones, defined in `lib/status.ts`, wired to colour in `globals.css` as `--t
 | Tone | Means | Reads as |
 | --- | --- | --- |
 | `ok` | it worked / healthy / done | bottle green |
-| `working` | under way right now | accent |
+| `working` | under way right now | pale green, Bottle Green edge (hollow square) |
 | `attention` | needs a human, or a next step the founder must take | amber |
 | `blocked` | it failed, or cannot proceed | red |
 | `idle` | nothing is happening, or we do not know | grey |
+
+**Why `working` is pale green with a Bottle Green edge (HC-058).** `ok` and `working` used to be
+the same Bottle Green, `#1a3b26`. A reader could not tell "done" from "under way", and on a money
+screen those are different facts: an invoice that is paid and an invoice that is being sent would
+look the same. The UI gate's first screenshot showed two identical squares above two different
+labels.
+
+The fix uses two existing things together, and adds no new colour:
+
+- **Colour.** `--tone-working` now points at `--color-accent-tint` (`#e4eae3`), the pale Bottle Green
+  already in the palette. It reads as the same family as `ok`, but clearly lighter: on its way, not
+  finished.
+- **Shape.** The `working` mark has a 1px Bottle Green edge, so it reads as a hollow square beside
+  `ok`'s solid one. A reader who cannot see colour well can still tell them apart.
+
+Two options were turned down. Dropping to four tones would merge "paid" and "being sent", which the
+invoices and approvals work needs to keep apart. The ink-soft grey the ticket suggested sits too
+close to `idle`'s grey and reads as "nothing happening", the opposite of "working".
+
+**`--tone-working` is a fill colour. Never use it to colour text.** Pale green on paper cannot be
+read. A domain that needs to say "working" in words uses ink, with the mark beside it.
+
+The matching change in fountainbridge is still owed. fountainbridge has the same collision, and
+until it takes the same fix, this one line of `globals.css` no longer matches its copy.
 
 Every domain status — CI conclusions, ticket columns, approval states, lane faults — maps onto these
 through a function in `lib/status.ts`. A component asks for a tone and calls `toneColor(tone)`; it
